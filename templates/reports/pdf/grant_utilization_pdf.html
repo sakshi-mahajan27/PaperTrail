@@ -1,0 +1,40 @@
+{% extends "reports/pdf/base_pdf.html" %}
+{% block report_title %}Grant Utilization Report{% endblock %}
+{% block content %}
+<table>
+  <thead>
+    <tr>
+      <th style="width:4%">#</th>
+      <th style="width:22%">Grant</th>
+      <th style="width:18%">Donor</th>
+      <th style="width:8%">Status</th>
+      <th style="width:12%;text-align:right">Budget (₹)</th>
+      <th style="width:12%;text-align:right">Utilized (₹)</th>
+      <th style="width:12%;text-align:right">Remaining (₹)</th>
+      <th style="width:12%;text-align:right">Burn Rate</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for grant in grants %}
+    <tr>
+      <td>{{ forloop.counter }}</td>
+      <td>{{ grant.name }}</td>
+      <td>{{ grant.donor.name }}</td>
+      <td>
+        <span class="badge badge-secondary">{{ grant.get_status_display }}</span>
+      </td>
+      <td style="text-align:right">{{ grant.total_amount|floatformat:2 }}</td>
+      <td style="text-align:right">{{ grant.utilized_amount|floatformat:2 }}</td>
+      <td style="text-align:right;{% if grant.remaining_amount < 0 %}color:#dc2626;{% endif %}">
+        {{ grant.remaining_amount|floatformat:2 }}
+      </td>
+      <td style="text-align:right;{% if grant.burn_rate >= 90 %}color:#dc2626;{% elif grant.burn_rate >= 70 %}color:#d97706;{% else %}color:#16a34a;{% endif %}">
+        {{ grant.burn_rate }}%
+      </td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="8" style="text-align:center;color:#888;">No grants found.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

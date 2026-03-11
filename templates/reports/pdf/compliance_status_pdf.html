@@ -1,0 +1,45 @@
+{% extends "reports/pdf/base_pdf.html" %}
+{% load papertrail_extras %}
+{% block report_title %}Compliance Status Report{% endblock %}
+{% block content %}
+<table>
+  <thead>
+    <tr>
+      <th style="width:5%">#</th>
+      <th style="width:25%">Certificate Type</th>
+      <th style="width:15%">Issue Date</th>
+      <th style="width:15%">Expiry Date</th>
+      <th style="width:20%">Days to Expiry</th>
+      <th style="width:20%">Status</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for doc in docs %}
+    <tr>
+      <td>{{ forloop.counter }}</td>
+      <td>{{ doc.get_cert_type_display }}</td>
+      <td>{{ doc.issue_date }}</td>
+      <td>{{ doc.expiry_date }}</td>
+      <td>
+        {% if doc.days_to_expiry < 0 %}
+          <span style="color:#dc2626;">Expired {{ doc.days_to_expiry|abs_value }} days ago</span>
+        {% else %}
+          {{ doc.days_to_expiry }} days
+        {% endif %}
+      </td>
+      <td>
+        {% if doc.status == "green" %}
+          <span class="badge badge-success">{{ doc.status_label }}</span>
+        {% elif doc.status == "yellow" %}
+          <span class="badge badge-warning">{{ doc.status_label }}</span>
+        {% else %}
+          <span class="badge badge-danger">{{ doc.status_label }}</span>
+        {% endif %}
+      </td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="6" style="text-align:center;color:#888;">No compliance documents found.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

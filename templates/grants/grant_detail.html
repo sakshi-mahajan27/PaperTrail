@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% block title %}{{ grant.name }}{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h4 class="fw-bold mb-0">{{ grant.name }}</h4>
+  <div class="d-flex gap-2">
+    {% if user.can_write %}
+    <a href="{% url 'grants:grant_edit' grant.pk %}" class="btn btn-sm btn-primary">Edit</a>
+    {% if grant.status != 'closed' %}
+    <a href="{% url 'grants:grant_close' grant.pk %}" class="btn btn-sm btn-outline-danger">Close Grant</a>
+    {% endif %}
+    {% endif %}
+    <a href="{% url 'grants:grant_list' %}" class="btn btn-sm btn-outline-secondary">Back</a>
+  </div>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-md-5">
+    <div class="card p-4 h-100">
+      <h6 class="fw-semibold mb-3">Grant Details</h6>
+      <dl class="row mb-0 small">
+        <dt class="col-sm-5">Donor</dt><dd class="col-sm-7"><a href="{% url 'donors:donor_detail' grant.donor.pk %}">{{ grant.donor.name }}</a></dd>
+        <dt class="col-sm-5">Status</dt>
+        <dd class="col-sm-7">
+          <span class="badge {% if grant.status == 'active' %}bg-success{% elif grant.status == 'pending' %}bg-warning text-dark{% else %}bg-secondary{% endif %}">
+            {{ grant.get_status_display }}
+          </span>
+        </dd>
+        <dt class="col-sm-5">Period</dt><dd class="col-sm-7">{{ grant.start_date }} – {{ grant.end_date }}</dd>
+        <dt class="col-sm-5">Purpose</dt><dd class="col-sm-7">{{ grant.purpose }}</dd>
+        {% if grant.agreement_file %}
+        <dt class="col-sm-5">Agreement</dt>
+        <dd class="col-sm-7"><a href="{{ grant.agreement_file.url }}" target="_blank">Download</a></dd>
+        {% endif %}
+      </dl>
+    </div>
+  </div>
+  <div class="col-md-7">
+    <div class="card p-4 h-100">
+      <h6 class="fw-semibold mb-3">Fund Utilization</h6>
+      <div class="mb-2 d-flex justify-content-between">
+        <span>Total Budget</span><strong>₹{{ grant.total_amount|floatformat:2 }}</strong>
+      </div>
+      <div class="mb-2 d-flex justify-content-between">
+        <span>Utilized</span><strong>₹{{ grant.utilized_amount|floatformat:2 }}</strong>
+      </div>
+      <div class="mb-3 d-flex justify-content-between">
+        <span>Remaining</span>
+        <strong class="{% if grant.remaining_amount < 0 %}text-danger{% endif %}">
+          ₹{{ grant.remaining_amount|floatformat:2 }}
+        </strong>
+      </div>
+      <div class="progress" style="height:12px;">
+        <div class="progress-bar {% if grant.burn_rate >= 90 %}bg-danger{% elif grant.burn_rate >= 70 %}bg-warning{% else %}bg-success{% endif %}"
+             role="progressbar" style="width:{% if grant.burn_rate > 100 %}100{% else %}{{ grant.burn_rate }}{% endif %}%">
+          {{ grant.burn_rate }}%
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header fw-semibold">Expense Allocations</div>
+  <div class="table-responsive">
+    <table class="table table-hover mb-0">
+      <thead class="table-light">
+        <tr><th>Expense</th><th>Date</th><th>Allocated Amount</th><th>Total Expense</th></tr>
+      </thead>
+      <tbody>
+        {% for alloc in allocations %}
+        <tr>
+          <td><a href="{% url 'expenses:expense_detail' alloc.expense.pk %}">{{ alloc.expense.title|truncatechars:50 }}</a></td>
+          <td>{{ alloc.expense.expense_date }}</td>
+          <td>₹{{ alloc.allocated_amount|floatformat:2 }}</td>
+          <td>₹{{ alloc.expense.total_amount|floatformat:2 }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="4" class="text-muted text-center py-3">No expenses allocated to this grant yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

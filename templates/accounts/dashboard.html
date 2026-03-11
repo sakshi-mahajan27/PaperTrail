@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<h4 class="fw-bold mb-4"><i class="bi bi-speedometer2 me-2"></i>Dashboard</h4>
+
+<!-- Compliance Status Row -->
+<div class="row g-3 mb-4">
+  <div class="col-md-4">
+    <div class="card p-3 border-start border-success border-4">
+      <div class="d-flex justify-content-between align-items-center">
+        <div>
+          <div class="text-muted small">Valid Certificates</div>
+          <div class="fs-3 fw-bold text-success">{{ compliance_summary.green }}</div>
+        </div>
+        <i class="bi bi-shield-check text-success fs-2"></i>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card p-3 border-start border-warning border-4">
+      <div class="d-flex justify-content-between align-items-center">
+        <div>
+          <div class="text-muted small">Expiring Soon</div>
+          <div class="fs-3 fw-bold text-warning">{{ compliance_summary.yellow }}</div>
+        </div>
+        <i class="bi bi-exclamation-triangle text-warning fs-2"></i>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card p-3 border-start border-danger border-4">
+      <div class="d-flex justify-content-between align-items-center">
+        <div>
+          <div class="text-muted small">Expired Certificates</div>
+          <div class="fs-3 fw-bold text-danger">{{ compliance_summary.red }}</div>
+        </div>
+        <i class="bi bi-shield-x text-danger fs-2"></i>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Active Grants Burn Rate -->
+<div class="card mb-4">
+  <div class="card-header fw-semibold d-flex justify-content-between">
+    <span><i class="bi bi-wallet2 me-2"></i>Active Grants – Fund Utilization</span>
+    <a href="{% url 'grants:grant_list' %}" class="btn btn-sm btn-outline-primary">View All</a>
+  </div>
+  <div class="card-body p-0">
+    {% if active_grants %}
+    <div class="table-responsive">
+      <table class="table table-hover mb-0">
+        <thead class="table-light">
+          <tr><th>Grant</th><th>Donor</th><th>Budget</th><th>Utilized</th><th>Burn Rate</th></tr>
+        </thead>
+        <tbody>
+          {% for grant in active_grants %}
+          <tr>
+            <td><a href="{% url 'grants:grant_detail' grant.pk %}">{{ grant.name }}</a></td>
+            <td>{{ grant.donor.name }}</td>
+            <td>₹{{ grant.total_amount|floatformat:2 }}</td>
+            <td>₹{{ grant.utilized_amount|floatformat:2 }}</td>
+            <td style="min-width:150px;">
+              <div class="d-flex align-items-center gap-2">
+                <div class="progress flex-grow-1" style="height:8px;">
+                  <div class="progress-bar {% if grant.burn_rate >= 90 %}bg-danger{% elif grant.burn_rate >= 70 %}bg-warning{% else %}bg-success{% endif %}"
+                       role="progressbar" style="width:{{ grant.burn_rate }}%"></div>
+                </div>
+                <small>{{ grant.burn_rate }}%</small>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+      <p class="text-muted p-3 mb-0">No active grants.</p>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Recent Expenses + Audit Log -->
+<div class="row g-3">
+  <div class="col-lg-7">
+    <div class="card">
+      <div class="card-header fw-semibold d-flex justify-content-between">
+        <span><i class="bi bi-receipt me-2"></i>Recent Expenses</span>
+        <a href="{% url 'expenses:expense_list' %}" class="btn btn-sm btn-outline-primary">View All</a>
+      </div>
+      <div class="card-body p-0">
+        {% if recent_expenses %}
+        <div class="table-responsive">
+          <table class="table table-hover mb-0">
+            <thead class="table-light"><tr><th>Title</th><th>Amount</th><th>Date</th><th>By</th></tr></thead>
+            <tbody>
+              {% for exp in recent_expenses %}
+              <tr>
+                <td><a href="{% url 'expenses:expense_detail' exp.pk %}">{{ exp.title|truncatechars:35 }}</a></td>
+                <td>₹{{ exp.total_amount|floatformat:2 }}</td>
+                <td>{{ exp.expense_date }}</td>
+                <td>{{ exp.created_by.username }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}<p class="text-muted p-3 mb-0">No expenses recorded.</p>{% endif %}
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-5">
+    <div class="card">
+      <div class="card-header fw-semibold d-flex justify-content-between">
+        <span><i class="bi bi-clock-history me-2"></i>Recent Activity</span>
+        <a href="{% url 'audit:audit_log_list' %}" class="btn btn-sm btn-outline-secondary">View All</a>
+      </div>
+      <ul class="list-group list-group-flush">
+        {% for log in recent_logs %}
+        <li class="list-group-item py-2">
+          <div class="d-flex justify-content-between">
+            <small class="fw-semibold">{{ log.user.username|default:"System" }}</small>
+            <small class="text-muted">{{ log.timestamp|date:"d M, H:i" }}</small>
+          </div>
+          <small class="text-muted">
+            <span class="badge {% if log.action == 'CREATED' %}bg-success{% elif log.action == 'UPDATED' %}bg-primary{% else %}bg-danger{% endif %} me-1">{{ log.action }}</span>
+            {{ log.model_name }} #{{ log.object_id }}
+          </small>
+        </li>
+        {% empty %}
+        <li class="list-group-item text-muted">No activity yet.</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+</div>
+{% endblock %}

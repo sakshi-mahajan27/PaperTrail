@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Remove Donor{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h4 class="fw-bold mb-0 text-danger">Remove Donor</h4>
+  <a href="{% url 'donors:donor_list' %}" class="btn btn-outline-secondary btn-sm">Back</a>
+</div>
+<div class="card p-4" style="max-width:480px;">
+  <p>Are you sure you want to deactivate donor <strong>{{ donor.name }}</strong>?</p>
+  <p class="text-muted small">This will soft-delete the donor. Their data will be preserved but hidden from active lists.</p>
+  <form method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger">Yes, Deactivate</button>
+    <a href="{% url 'donors:donor_detail' donor.pk %}" class="btn btn-outline-secondary ms-2">Cancel</a>
+  </form>
+</div>
+{% endblock %}

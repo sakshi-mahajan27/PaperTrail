@@ -1,0 +1,52 @@
+{% extends "reports/pdf/base_pdf.html" %}
+{% block report_title %}Financial Summary Report{% endblock %}
+{% block content %}
+
+<table class="summary-table" style="margin-bottom:14pt;">
+  <tr>
+    <td style="width:33%;padding:10pt;text-align:center;border:1pt solid #dde;">
+      <div class="summary-label">Total Grants Awarded</div>
+      <div class="summary-value summary-primary">₹{{ total_grants|floatformat:2 }}</div>
+    </td>
+    <td style="width:33%;padding:10pt;text-align:center;border:1pt solid #dde;">
+      <div class="summary-label">Total Expenses Recorded</div>
+      <div class="summary-value summary-danger">₹{{ total_expenses|floatformat:2 }}</div>
+    </td>
+    <td style="width:33%;padding:10pt;text-align:center;border:1pt solid #dde;">
+      <div class="summary-label">Net Unspent Balance</div>
+      <div class="summary-value summary-success">₹{{ net_unspent|floatformat:2 }}</div>
+    </td>
+  </tr>
+</table>
+
+<table>
+  <thead>
+    <tr>
+      <th style="width:4%">#</th>
+      <th style="width:28%">Grant Name</th>
+      <th style="width:20%">Donor</th>
+      <th style="width:12%">Status</th>
+      <th style="width:12%;text-align:right">Budget (₹)</th>
+      <th style="width:12%;text-align:right">Utilized (₹)</th>
+      <th style="width:12%;text-align:right">Remaining (₹)</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for grant in grants %}
+    <tr>
+      <td>{{ forloop.counter }}</td>
+      <td>{{ grant.name }}</td>
+      <td>{{ grant.donor.name }}</td>
+      <td><span class="badge badge-secondary">{{ grant.get_status_display }}</span></td>
+      <td style="text-align:right">{{ grant.total_amount|floatformat:2 }}</td>
+      <td style="text-align:right">{{ grant.utilized_amount|floatformat:2 }}</td>
+      <td style="text-align:right;{% if grant.remaining_amount < 0 %}color:#dc2626;{% endif %}">
+        {{ grant.remaining_amount|floatformat:2 }}
+      </td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="7" style="text-align:center;color:#888;">No grants found.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

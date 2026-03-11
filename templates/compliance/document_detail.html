@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% load papertrail_extras %}
+{% block title %}{{ doc.get_cert_type_display }}{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h4 class="fw-bold mb-0">{{ doc.get_cert_type_display }}</h4>
+  <a href="{% url 'compliance:document_list' %}" class="btn btn-outline-secondary btn-sm">
+    <i class="bi bi-arrow-left me-1"></i>Back
+  </a>
+</div>
+<div class="card p-4" style="max-width:500px;">
+  <div class="mb-3">
+    <span class="badge fs-6
+      {% if doc.status == 'green' %}bg-success
+      {% elif doc.status == 'yellow' %}bg-warning text-dark
+      {% else %}bg-danger{% endif %}">
+      {{ doc.status_label }}
+    </span>
+  </div>
+  <dl class="row">
+    <dt class="col-sm-5">Certificate Type</dt><dd class="col-sm-7">{{ doc.get_cert_type_display }}</dd>
+    <dt class="col-sm-5">Issue Date</dt><dd class="col-sm-7">{{ doc.issue_date }}</dd>
+    <dt class="col-sm-5">Expiry Date</dt><dd class="col-sm-7">{{ doc.expiry_date }}</dd>
+    <dt class="col-sm-5">Days to Expiry</dt>
+    <dd class="col-sm-7">
+      {% if doc.days_to_expiry < 0 %}<span class="text-danger">Expired {{ doc.days_to_expiry|abs_value }} days ago</span>
+      {% else %}{{ doc.days_to_expiry }} days{% endif %}
+    </dd>
+    <dt class="col-sm-5">Uploaded By</dt><dd class="col-sm-7">{{ doc.uploaded_by|default:"—" }}</dd>
+    <dt class="col-sm-5">Uploaded At</dt><dd class="col-sm-7">{{ doc.uploaded_at|date:"d M Y, H:i" }}</dd>
+    <dt class="col-sm-5">File</dt>
+    <dd class="col-sm-7">
+      {% if doc.certificate_file %}
+        <a href="{{ doc.certificate_file.url }}" target="_blank">
+          <i class="bi bi-file-earmark-arrow-down me-1"></i>Download
+        </a>
+      {% else %}—{% endif %}
+    </dd>
+    {% if doc.notes %}
+    <dt class="col-sm-5">Notes</dt><dd class="col-sm-7">{{ doc.notes }}</dd>
+    {% endif %}
+  </dl>
+  {% if user.is_admin_role %}
+  <a href="{% url 'compliance:document_edit' doc.pk %}" class="btn btn-primary btn-sm">Edit</a>
+  {% endif %}
+</div>
+{% endblock %}

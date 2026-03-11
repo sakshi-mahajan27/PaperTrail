@@ -1,0 +1,6 @@
+Django>=5.2
+psycopg2-binary>=2.9
+Pillow>=10.0
+django-crispy-forms>=2.0
+crispy-bootstrap5>=2024.2
+xhtml2pdf>=0.2.17

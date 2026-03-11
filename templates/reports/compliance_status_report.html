@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% load papertrail_extras %}
+{% block title %}Compliance Status Report{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h4 class="fw-bold mb-0"><i class="bi bi-shield-check me-2"></i>Compliance Status Report</h4>
+  <div class="d-flex gap-2">
+    <a href="{% url 'reports:compliance_status_pdf' %}" class="btn btn-sm btn-danger" target="_blank">
+      <i class="bi bi-file-earmark-pdf me-1"></i>Export PDF
+    </a>
+    <a href="{% url 'reports:report_index' %}" class="btn btn-outline-secondary btn-sm">Back</a>
+  </div>
+</div>
+<div class="card">
+  <div class="table-responsive">
+    <table class="table mb-0">
+      <thead class="table-light">
+        <tr><th>Certificate</th><th>Issue Date</th><th>Expiry Date</th><th>Days to Expiry</th><th>Status</th></tr>
+      </thead>
+      <tbody>
+        {% for doc in docs %}
+        <tr>
+          <td>{{ doc.get_cert_type_display }}</td>
+          <td>{{ doc.issue_date }}</td>
+          <td>{{ doc.expiry_date }}</td>
+          <td>
+            {% if doc.days_to_expiry < 0 %}
+              <span class="text-danger">Expired {{ doc.days_to_expiry|abs_value }} days ago</span>
+            {% else %}{{ doc.days_to_expiry }} days{% endif %}
+          </td>
+          <td>
+            <span class="badge {% if doc.status == 'green' %}bg-success{% elif doc.status == 'yellow' %}bg-warning text-dark{% else %}bg-danger{% endif %}">
+              {{ doc.status_label }}
+            </span>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="5" class="text-muted text-center py-4">No certificates.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

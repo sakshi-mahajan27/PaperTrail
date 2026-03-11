@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}{{ donor.name }}{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h4 class="fw-bold mb-0">{{ donor.name }}</h4>
+  <div class="d-flex gap-2">
+    {% if user.can_write %}
+    <a href="{% url 'donors:donor_edit' donor.pk %}" class="btn btn-sm btn-primary">Edit</a>
+    {% endif %}
+    <a href="{% url 'donors:donor_list' %}" class="btn btn-sm btn-outline-secondary">Back</a>
+  </div>
+</div>
+<div class="row g-3">
+  <div class="col-md-5">
+    <div class="card p-4">
+      <dl class="row mb-0">
+        <dt class="col-sm-5">Type</dt><dd class="col-sm-7">{{ donor.get_donor_type_display }}</dd>
+        <dt class="col-sm-5">Email</dt><dd class="col-sm-7">{{ donor.email|default:"—" }}</dd>
+        <dt class="col-sm-5">Phone</dt><dd class="col-sm-7">{{ donor.phone|default:"—" }}</dd>
+        <dt class="col-sm-5">Country</dt><dd class="col-sm-7">{{ donor.country }}</dd>
+        <dt class="col-sm-5">PAN</dt><dd class="col-sm-7">{{ donor.pan_number|default:"—" }}</dd>
+        {% if donor.address %}<dt class="col-sm-5">Address</dt><dd class="col-sm-7">{{ donor.address }}</dd>{% endif %}
+        {% if donor.notes %}<dt class="col-sm-5">Notes</dt><dd class="col-sm-7">{{ donor.notes }}</dd>{% endif %}
+      </dl>
+    </div>
+  </div>
+  <div class="col-md-7">
+    <div class="card">
+      <div class="card-header fw-semibold">Grants</div>
+      <div class="table-responsive">
+        <table class="table table-hover mb-0">
+          <thead class="table-light"><tr><th>Name</th><th>Budget</th><th>Status</th><th>Burn Rate</th></tr></thead>
+          <tbody>
+            {% for grant in donor.grants.all %}
+            {% if grant.is_active %}
+            <tr>
+              <td><a href="{% url 'grants:grant_detail' grant.pk %}">{{ grant.name }}</a></td>
+              <td>₹{{ grant.total_amount|floatformat:2 }}</td>
+              <td><span class="badge bg-secondary">{{ grant.get_status_display }}</span></td>
+              <td>{{ grant.burn_rate }}%</td>
+            </tr>
+            {% endif %}
+            {% empty %}
+            <tr><td colspan="4" class="text-muted text-center py-3">No grants.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

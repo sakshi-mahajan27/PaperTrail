@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Reports{% endblock %}
+{% block content %}
+<h4 class="fw-bold mb-4"><i class="bi bi-file-earmark-bar-graph me-2"></i>Reports</h4>
+<div class="row g-3">
+  {% for name, url, icon, desc in report_cards %}
+  <div class="col-md-4">
+    <div class="card h-100">
+      <div class="card-body">
+        <i class="bi {{ icon }} fs-2 text-primary mb-2"></i>
+        <h6 class="fw-bold">{{ name }}</h6>
+        <p class="text-muted small">{{ desc }}</p>
+        <a href="{{ url }}" class="btn btn-sm btn-outline-primary">Generate</a>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

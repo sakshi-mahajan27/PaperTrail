@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Donor-wise Expense Report{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h4 class="fw-bold mb-0"><i class="bi bi-person-lines-fill me-2"></i>Donor-wise Expense Report</h4>
+  <div class="d-flex gap-2">
+    <a href="{% url 'reports:donor_expense_pdf' %}" class="btn btn-sm btn-danger" target="_blank">
+      <i class="bi bi-file-earmark-pdf me-1"></i>Export PDF
+    </a>
+    <a href="{% url 'reports:report_index' %}" class="btn btn-outline-secondary btn-sm">Back</a>
+  </div>
+</div>
+<div class="card">
+  <div class="table-responsive">
+    <table class="table mb-0">
+      <thead class="table-light">
+        <tr><th>#</th><th>Donor</th><th>Type</th><th>Total Expenses (₹)</th></tr>
+      </thead>
+      <tbody>
+        {% for row in rows %}
+        <tr>
+          <td>{{ forloop.counter }}</td>
+          <td><a href="{% url 'donors:donor_detail' row.donor.pk %}">{{ row.donor.name }}</a></td>
+          <td>{{ row.donor.get_donor_type_display }}</td>
+          <td>₹{{ row.total|floatformat:2 }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="4" class="text-muted text-center py-4">No data.</td></tr>
+        {% endfor %}
+      </tbody>
+      {% if rows %}
+      <tfoot class="table-light">
+        <tr>
+          <th colspan="3">Grand Total</th>
+          <th>₹{% with total=0 %}{% for r in rows %}{% endfor %}{{ rows|length }}{% endwith %} —</th>
+        </tr>
+      </tfoot>
+      {% endif %}
+    </table>
+  </div>
+</div>
+{% endblock %}

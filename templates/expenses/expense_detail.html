@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}{{ expense.title }}{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h4 class="fw-bold mb-0">{{ expense.title }}</h4>
+  <div class="d-flex gap-2">
+    {% if user.can_write %}
+    <a href="{% url 'expenses:expense_edit' expense.pk %}" class="btn btn-sm btn-primary">Edit</a>
+    <a href="{% url 'expenses:expense_delete' expense.pk %}" class="btn btn-sm btn-outline-danger">Remove</a>
+    {% endif %}
+    <a href="{% url 'expenses:expense_list' %}" class="btn btn-sm btn-outline-secondary">Back</a>
+  </div>
+</div>
+<div class="row g-3">
+  <div class="col-md-5">
+    <div class="card p-4 h-100">
+      <dl class="row mb-0 small">
+        <dt class="col-sm-5">Amount</dt><dd class="col-sm-7 fw-bold">₹{{ expense.total_amount|floatformat:2 }}</dd>
+        <dt class="col-sm-5">Date</dt><dd class="col-sm-7">{{ expense.expense_date }}</dd>
+        <dt class="col-sm-5">Recorded By</dt><dd class="col-sm-7">{{ expense.created_by.get_full_name|default:expense.created_by.username }}</dd>
+        <dt class="col-sm-5">Created</dt><dd class="col-sm-7">{{ expense.created_at|date:"d M Y, H:i" }}</dd>
+        {% if expense.description %}
+        <dt class="col-sm-5">Description</dt><dd class="col-sm-7">{{ expense.description }}</dd>
+        {% endif %}
+        <dt class="col-sm-5">Receipt</dt>
+        <dd class="col-sm-7">
+          {% if expense.receipt %}
+            <a href="{{ expense.receipt.url }}" target="_blank">
+              <i class="bi bi-file-earmark-arrow-down me-1"></i>Download
+            </a>
+          {% else %}<span class="text-danger">Not uploaded</span>{% endif %}
+        </dd>
+      </dl>
+    </div>
+  </div>
+  <div class="col-md-7">
+    <div class="card">
+      <div class="card-header fw-semibold">Fund Allocations</div>
+      <div class="table-responsive">
+        <table class="table table-hover mb-0">
+          <thead class="table-light">
+            <tr><th>Grant</th><th>Donor</th><th>Allocated Amount</th></tr>
+          </thead>
+          <tbody>
+            {% for alloc in expense.allocations.all %}
+            <tr>
+              <td><a href="{% url 'grants:grant_detail' alloc.grant.pk %}">{{ alloc.grant.name }}</a></td>
+              <td>{{ alloc.grant.donor.name }}</td>
+              <td>₹{{ alloc.allocated_amount|floatformat:2 }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="3" class="text-muted text-center py-3">No allocations.</td></tr>
+            {% endfor %}
+          </tbody>
+          <tfoot class="table-light">
+            <tr>
+              <th colspan="2">Total</th>
+              <th>₹{{ expense.total_amount|floatformat:2 }}</th>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

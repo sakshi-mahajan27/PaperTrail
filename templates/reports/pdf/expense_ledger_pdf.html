@@ -1,0 +1,46 @@
+{% extends "reports/pdf/base_pdf.html" %}
+{% block report_title %}Expense Ledger{% endblock %}
+{% block extra_meta %}{% if grant_name %}&nbsp;&bull;&nbsp; Filtered by grant: {{ grant_name }}{% endif %}{% endblock %}
+{% block content %}
+<table>
+  <thead>
+    <tr>
+      <th style="width:4%">#</th>
+      <th style="width:10%">Date</th>
+      <th style="width:25%">Title</th>
+      <th style="width:12%;text-align:right">Amount (₹)</th>
+      <th style="width:30%">Grant Allocations</th>
+      <th style="width:12%">Recorded By</th>
+      <th style="width:7%">Receipt</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for expense in expenses %}
+    <tr>
+      <td>{{ forloop.counter }}</td>
+      <td>{{ expense.expense_date }}</td>
+      <td>{{ expense.title|truncatechars:45 }}</td>
+      <td style="text-align:right">{{ expense.total_amount|floatformat:2 }}</td>
+      <td>
+        {% for alloc in expense.allocations.all %}
+          {{ alloc.grant.name|truncatechars:20 }} (₹{{ alloc.allocated_amount|floatformat:0 }}){% if not forloop.last %}, {% endif %}
+        {% endfor %}
+      </td>
+      <td>{{ expense.created_by.username }}</td>
+      <td style="text-align:center">{% if expense.receipt %}Yes{% else %}<span style="color:#dc2626;">No</span>{% endif %}</td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="7" style="text-align:center;color:#888;">No expenses found.</td></tr>
+    {% endfor %}
+  </tbody>
+  {% if expenses %}
+  <tfoot>
+    <tr>
+      <td colspan="3" style="text-align:right">Grand Total</td>
+      <td style="text-align:right">{{ total_amount|floatformat:2 }}</td>
+      <td colspan="3"></td>
+    </tr>
+  </tfoot>
+  {% endif %}
+</table>
+{% endblock %}

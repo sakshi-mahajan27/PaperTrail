@@ -1,0 +1,36 @@
+{% extends "reports/pdf/base_pdf.html" %}
+{% block report_title %}Donor-wise Expense Report{% endblock %}
+{% block content %}
+<table>
+  <thead>
+    <tr>
+      <th style="width:5%">#</th>
+      <th style="width:40%">Donor Name</th>
+      <th style="width:20%">Type</th>
+      <th style="width:20%">Country</th>
+      <th style="width:15%;text-align:right">Total Expenses (₹)</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for row in rows %}
+    <tr>
+      <td>{{ forloop.counter }}</td>
+      <td>{{ row.donor.name }}</td>
+      <td>{{ row.donor.get_donor_type_display }}</td>
+      <td>{{ row.donor.country|default:"—" }}</td>
+      <td style="text-align:right">{{ row.total|floatformat:2 }}</td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="5" style="text-align:center;color:#888;">No donor data available.</td></tr>
+    {% endfor %}
+  </tbody>
+  {% if rows %}
+  <tfoot>
+    <tr>
+      <td colspan="4" style="text-align:right">Grand Total</td>
+      <td style="text-align:right">{{ grand_total|floatformat:2 }}</td>
+    </tr>
+  </tfoot>
+  {% endif %}
+</table>
+{% endblock %}
