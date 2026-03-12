@@ -33,7 +33,6 @@ def dashboard_view(request):
     from apps.compliance.models import ComplianceDocument
     from apps.grants.models import Grant
     from apps.expenses.models import Expense
-    from apps.audit.models import AuditLog
 
     docs = ComplianceDocument.objects.all()
     compliance_summary = {
@@ -43,13 +42,11 @@ def dashboard_view(request):
     }
     active_grants = Grant.objects.filter(is_active=True, status="active")
     recent_expenses = Expense.objects.filter(is_active=True).select_related("created_by").order_by("-created_at")[:10]
-    recent_logs = AuditLog.objects.select_related("user").order_by("-timestamp")[:8]
 
     context = {
         "compliance_summary": compliance_summary,
         "active_grants": active_grants,
         "recent_expenses": recent_expenses,
-        "recent_logs": recent_logs,
     }
     return render(request, "accounts/dashboard.html", context)
 

@@ -17,7 +17,6 @@ urlpatterns = [
     path("donors/", include("apps.donors.urls", namespace="donors")),
     path("grants/", include("apps.grants.urls", namespace="grants")),
     path("expenses/", include("apps.expenses.urls", namespace="expenses")),
-    path("audit/", include("apps.audit.urls", namespace="audit")),
     path("reports/", include("apps.reports.urls", namespace="reports")),
     # Root redirect → dashboard
     path("", RedirectView.as_view(url="/accounts/dashboard/", permanent=False)),

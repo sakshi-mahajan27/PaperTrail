@@ -54,12 +54,9 @@
       <i class="bi bi-receipt me-2"></i>Expenses
     </a>
 
-    <div class="nav-section mt-2">Reports & Audit</div>
+    <div class="nav-section mt-2">Reports</div>
     <a class="nav-link mb-1" href="{% url 'reports:report_index' %}">
       <i class="bi bi-file-earmark-bar-graph me-2"></i>Reports
-    </a>
-    <a class="nav-link mb-1" href="{% url 'audit:audit_log_list' %}">
-      <i class="bi bi-clock-history me-2"></i>Audit Log
     </a>
 
     {% if user.is_admin_role %}

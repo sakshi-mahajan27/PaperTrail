@@ -80,9 +80,9 @@
   </div>
 </div>
 
-<!-- Recent Expenses + Audit Log -->
+<!-- Recent Expenses -->
 <div class="row g-3">
-  <div class="col-lg-7">
+  <div class="col-12">
     <div class="card">
       <div class="card-header fw-semibold d-flex justify-content-between">
         <span><i class="bi bi-receipt me-2"></i>Recent Expenses</span>
@@ -107,30 +107,6 @@
         </div>
         {% else %}<p class="text-muted p-3 mb-0">No expenses recorded.</p>{% endif %}
       </div>
-    </div>
-  </div>
-  <div class="col-lg-5">
-    <div class="card">
-      <div class="card-header fw-semibold d-flex justify-content-between">
-        <span><i class="bi bi-clock-history me-2"></i>Recent Activity</span>
-        <a href="{% url 'audit:audit_log_list' %}" class="btn btn-sm btn-outline-secondary">View All</a>
-      </div>
-      <ul class="list-group list-group-flush">
-        {% for log in recent_logs %}
-        <li class="list-group-item py-2">
-          <div class="d-flex justify-content-between">
-            <small class="fw-semibold">{{ log.user.username|default:"System" }}</small>
-            <small class="text-muted">{{ log.timestamp|date:"d M, H:i" }}</small>
-          </div>
-          <small class="text-muted">
-            <span class="badge {% if log.action == 'CREATED' %}bg-success{% elif log.action == 'UPDATED' %}bg-primary{% else %}bg-danger{% endif %} me-1">{{ log.action }}</span>
-            {{ log.model_name }} #{{ log.object_id }}
-          </small>
-        </li>
-        {% empty %}
-        <li class="list-group-item text-muted">No activity yet.</li>
-        {% endfor %}
-      </ul>
     </div>
   </div>
 </div>

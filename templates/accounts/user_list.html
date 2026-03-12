@@ -11,7 +11,7 @@
   <div class="table-responsive">
     <table class="table table-hover mb-0">
       <thead class="table-light">
-        <tr><th>Username</th><th>Name</th><th>Email</th><th>Role</th><th>Status</th><th>Joined</th><th></th></tr>
+        <tr><th>Username</th><th>Name</th><th>Email</th><th>Role</th><th>Status</th><th></th></tr>
       </thead>
       <tbody>
         {% for u in users %}
@@ -21,7 +21,7 @@
           <td>{{ u.email|default:"—" }}</td>
           <td><span class="badge bg-secondary">{{ u.get_role_display }}</span></td>
           <td>{% if u.is_active %}<span class="badge bg-success">Active</span>{% else %}<span class="badge bg-danger">Inactive</span>{% endif %}</td>
-          <td>{{ u.date_joined|date:"d M Y" }}</td>
+
           <td><a href="{% url 'accounts:user_edit' u.pk %}" class="btn btn-sm btn-outline-secondary">Edit</a></td>
         </tr>
         {% empty %}
