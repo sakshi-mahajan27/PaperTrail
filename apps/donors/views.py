@@ -4,10 +4,11 @@ from django.contrib import messages
 
 from .models import Donor
 from .forms import DonorForm
-from apps.accounts.decorators import write_required
+from apps.accounts.decorators import role_required, finance_required
 
 
 @login_required
+@role_required("admin", "finance")
 def donor_list(request):
     qs = Donor.objects.filter(is_active=True)
     q = request.GET.get("q", "").strip()
@@ -25,13 +26,14 @@ def donor_list(request):
 
 
 @login_required
+@role_required("admin", "finance")
 def donor_detail(request, pk):
     donor = get_object_or_404(Donor, pk=pk, is_active=True)
     return render(request, "donors/donor_detail.html", {"donor": donor})
 
 
 @login_required
-@write_required
+@finance_required
 def donor_create(request):
     form = DonorForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
@@ -42,7 +44,7 @@ def donor_create(request):
 
 
 @login_required
-@write_required
+@finance_required
 def donor_edit(request, pk):
     donor = get_object_or_404(Donor, pk=pk, is_active=True)
     form = DonorForm(request.POST or None, instance=donor)
@@ -54,7 +56,7 @@ def donor_edit(request, pk):
 
 
 @login_required
-@write_required
+@finance_required
 def donor_delete(request, pk):
     donor = get_object_or_404(Donor, pk=pk, is_active=True)
     if request.method == "POST":

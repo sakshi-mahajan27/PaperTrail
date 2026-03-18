@@ -39,5 +39,5 @@ class User(AbstractUser):
 
     @property
     def can_write(self):
-        """Finance Manager and Admin can create/edit records."""
-        return self.role in (self.ROLE_ADMIN, self.ROLE_FINANCE)
+        """Finance Manager can create/edit financial records."""
+        return self.role == self.ROLE_FINANCE

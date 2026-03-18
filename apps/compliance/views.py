@@ -8,6 +8,7 @@ from apps.accounts.decorators import role_required
 
 
 @login_required
+@role_required("admin")
 def document_list(request):
     docs = ComplianceDocument.objects.all()
     return render(request, "compliance/document_list.html", {"docs": docs})
@@ -39,6 +40,7 @@ def document_edit(request, pk):
 
 
 @login_required
+@role_required("admin")
 def document_detail(request, pk):
     doc = get_object_or_404(ComplianceDocument, pk=pk)
     return render(request, "compliance/document_detail.html", {"doc": doc})

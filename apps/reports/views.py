@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from django.db.models import Sum
+from apps.accounts.decorators import report_required
 
 from apps.donors.models import Donor
 from apps.grants.models import Grant
@@ -9,6 +10,7 @@ from apps.compliance.models import ComplianceDocument
 
 
 @login_required
+@report_required
 def report_index(request):
     from django.urls import reverse
     report_cards = [
@@ -22,6 +24,7 @@ def report_index(request):
 
 
 @login_required
+@report_required
 def donor_expense_report(request):
     donors = Donor.objects.filter(is_active=True).prefetch_related(
         "grants__allocations__expense"
@@ -36,12 +39,14 @@ def donor_expense_report(request):
 
 
 @login_required
+@report_required
 def grant_utilization_report(request):
     grants = Grant.objects.filter(is_active=True).select_related("donor")
     return render(request, "reports/grant_utilization_report.html", {"grants": grants})
 
 
 @login_required
+@report_required
 def financial_summary_report(request):
     total_grants = Grant.objects.filter(is_active=True).aggregate(t=Sum("total_amount"))["t"] or 0
     total_expenses = Expense.objects.filter(is_active=True).aggregate(t=Sum("total_amount"))["t"] or 0
@@ -57,12 +62,14 @@ def financial_summary_report(request):
 
 
 @login_required
+@report_required
 def compliance_status_report(request):
     docs = ComplianceDocument.objects.all()
     return render(request, "reports/compliance_status_report.html", {"docs": docs})
 
 
 @login_required
+@report_required
 def expense_ledger_report(request):
     expenses = Expense.objects.filter(is_active=True).select_related("created_by").prefetch_related(
         "allocations__grant__donor"

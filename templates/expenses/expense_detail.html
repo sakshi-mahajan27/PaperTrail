@@ -6,7 +6,6 @@
   <div class="d-flex gap-2">
     {% if user.can_write %}
     <a href="{% url 'expenses:expense_edit' expense.pk %}" class="btn btn-sm btn-primary">Edit</a>
-    <a href="{% url 'expenses:expense_delete' expense.pk %}" class="btn btn-sm btn-outline-danger">Remove</a>
     {% endif %}
     <a href="{% url 'expenses:expense_list' %}" class="btn btn-sm btn-outline-secondary">Back</a>
   </div>

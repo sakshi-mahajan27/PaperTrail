@@ -35,7 +35,6 @@
           <td class="text-end">
             {% if user.can_write %}
             <a href="{% url 'expenses:expense_edit' expense.pk %}" class="btn btn-sm btn-outline-secondary">Edit</a>
-            <a href="{% url 'expenses:expense_delete' expense.pk %}" class="btn btn-sm btn-outline-danger">Remove</a>
             {% endif %}
           </td>
         </tr>

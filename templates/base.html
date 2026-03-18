@@ -38,11 +38,14 @@
       <i class="bi bi-speedometer2 me-2"></i>Dashboard
     </a>
 
+    {% if user.is_admin_role %}
     <div class="nav-section mt-2">Compliance</div>
     <a class="nav-link mb-1" href="{% url 'compliance:document_list' %}">
       <i class="bi bi-shield-check me-2"></i>Certificates
     </a>
+    {% endif %}
 
+    {% if user.is_admin_role or user.is_finance %}
     <div class="nav-section mt-2">Financials</div>
     <a class="nav-link mb-1" href="{% url 'donors:donor_list' %}">
       <i class="bi bi-people me-2"></i>Donors
@@ -58,6 +61,7 @@
     <a class="nav-link mb-1" href="{% url 'reports:report_index' %}">
       <i class="bi bi-file-earmark-bar-graph me-2"></i>Reports
     </a>
+    {% endif %}
 
     {% if user.is_admin_role %}
     <div class="nav-section mt-2">Admin</div>

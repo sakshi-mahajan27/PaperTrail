@@ -6,7 +6,7 @@ from django.db import transaction
 
 from .models import Expense, ExpenseAllocation
 from .forms import ExpenseForm, AllocationFormSet
-from apps.accounts.decorators import write_required
+from apps.accounts.decorators import role_required, finance_required
 
 
 def _validate_allocations(expense, formset):
@@ -54,19 +54,21 @@ def _validate_allocations(expense, formset):
 
 
 @login_required
+@role_required("admin", "finance")
 def expense_list(request):
     expenses = Expense.objects.filter(is_active=True).select_related("created_by").prefetch_related("allocations__grant")
     return render(request, "expenses/expense_list.html", {"expenses": expenses})
 
 
 @login_required
+@role_required("admin", "finance")
 def expense_detail(request, pk):
     expense = get_object_or_404(Expense, pk=pk, is_active=True)
     return render(request, "expenses/expense_detail.html", {"expense": expense})
 
 
 @login_required
-@write_required
+@finance_required
 def expense_create(request):
     form = ExpenseForm(request.POST or None, request.FILES or None)
     formset = AllocationFormSet(request.POST or None, prefix="allocations")
@@ -96,7 +98,7 @@ def expense_create(request):
 
 
 @login_required
-@write_required
+@finance_required
 def expense_edit(request, pk):
     expense = get_object_or_404(Expense, pk=pk, is_active=True)
     form = ExpenseForm(request.POST or None, request.FILES or None, instance=expense)
@@ -125,12 +127,7 @@ def expense_edit(request, pk):
 
 
 @login_required
-@write_required
+@role_required("admin", "finance")
 def expense_delete(request, pk):
-    expense = get_object_or_404(Expense, pk=pk, is_active=True)
-    if request.method == "POST":
-        expense.is_active = False
-        expense.save()
-        messages.success(request, f"Expense '{expense.title}' has been removed.")
-        return redirect("expenses:expense_list")
-    return render(request, "expenses/expense_confirm_delete.html", {"expense": expense})
+    messages.error(request, "Expense deletion is not allowed for this role policy.")
+    return redirect("expenses:expense_list")

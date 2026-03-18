@@ -1,6 +1,7 @@
 from django.contrib.auth.decorators import login_required
 from django.db.models import Sum
 from django.utils import timezone
+from apps.accounts.decorators import report_required
 
 from apps.donors.models import Donor
 from apps.grants.models import Grant
@@ -11,6 +12,7 @@ from .pdf_utils import render_pdf_response
 
 
 @login_required
+@report_required
 def donor_expense_pdf(request):
     donors = Donor.objects.filter(is_active=True).prefetch_related(
         "grants__allocations__expense"
@@ -37,6 +39,7 @@ def donor_expense_pdf(request):
 
 
 @login_required
+@report_required
 def grant_utilization_pdf(request):
     grants = Grant.objects.filter(is_active=True).select_related("donor")
     context = {
@@ -53,6 +56,7 @@ def grant_utilization_pdf(request):
 
 
 @login_required
+@report_required
 def financial_summary_pdf(request):
     total_grants = Grant.objects.filter(is_active=True).aggregate(t=Sum("total_amount"))["t"] or 0
     total_expenses = Expense.objects.filter(is_active=True).aggregate(t=Sum("total_amount"))["t"] or 0
@@ -75,6 +79,7 @@ def financial_summary_pdf(request):
 
 
 @login_required
+@report_required
 def compliance_status_pdf(request):
     docs = ComplianceDocument.objects.all()
     context = {
@@ -91,6 +96,7 @@ def compliance_status_pdf(request):
 
 
 @login_required
+@report_required
 def expense_ledger_pdf(request):
     expenses = Expense.objects.filter(is_active=True).select_related("created_by").prefetch_related(
         "allocations__grant__donor"
