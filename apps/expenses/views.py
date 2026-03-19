@@ -54,14 +54,14 @@ def _validate_allocations(expense, formset):
 
 
 @login_required
-@role_required("admin", "finance")
+@role_required("admin", "finance", "auditor")
 def expense_list(request):
     expenses = Expense.objects.filter(is_active=True).select_related("created_by").prefetch_related("allocations__grant")
     return render(request, "expenses/expense_list.html", {"expenses": expenses})
 
 
 @login_required
-@role_required("admin", "finance")
+@role_required("admin", "finance", "auditor")
 def expense_detail(request, pk):
     expense = get_object_or_404(Expense, pk=pk, is_active=True)
     return render(request, "expenses/expense_detail.html", {"expense": expense})

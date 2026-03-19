@@ -9,7 +9,7 @@ from apps.compliance.utils import is_compliant, get_compliance_issues
 
 
 @login_required
-@role_required("admin", "finance")
+@role_required("admin", "finance", "auditor")
 def grant_list(request):
     grants = Grant.objects.filter(is_active=True).select_related("donor")
     status_filter = request.GET.get("status", "")
@@ -23,7 +23,7 @@ def grant_list(request):
 
 
 @login_required
-@role_required("admin", "finance")
+@role_required("admin", "finance", "auditor")
 def grant_detail(request, pk):
     grant = get_object_or_404(Grant, pk=pk, is_active=True)
     allocations = grant.allocations.filter(expense__is_active=True).select_related("expense")

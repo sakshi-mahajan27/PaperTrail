@@ -8,7 +8,7 @@ from apps.accounts.decorators import role_required, finance_required
 
 
 @login_required
-@role_required("admin", "finance")
+@role_required("admin", "finance", "auditor")
 def donor_list(request):
     qs = Donor.objects.filter(is_active=True)
     q = request.GET.get("q", "").strip()
@@ -26,7 +26,7 @@ def donor_list(request):
 
 
 @login_required
-@role_required("admin", "finance")
+@role_required("admin", "finance", "auditor")
 def donor_detail(request, pk):
     donor = get_object_or_404(Donor, pk=pk, is_active=True)
     return render(request, "donors/donor_detail.html", {"donor": donor})

@@ -30,7 +30,7 @@
   <!-- Sidebar -->
   <nav class="sidebar d-flex flex-column p-3" style="width:230px;flex-shrink:0;">
     <a class="sidebar-brand text-decoration-none mb-4 d-flex align-items-center gap-2" href="{% url 'accounts:dashboard' %}">
-      <i class="bi bi-journal-check fs-5"></i> PaperTrail
+      <i class="bi bi-journal-check fs-5"></i> Asha Foundation
     </a>
 
     <div class="nav-section">Overview</div>
@@ -45,7 +45,7 @@
     </a>
     {% endif %}
 
-    {% if user.is_admin_role or user.is_finance %}
+    {% if user.is_admin_role or user.is_finance or user.is_auditor %}
     <div class="nav-section mt-2">Financials</div>
     <a class="nav-link mb-1" href="{% url 'donors:donor_list' %}">
       <i class="bi bi-people me-2"></i>Donors
@@ -57,10 +57,12 @@
       <i class="bi bi-receipt me-2"></i>Expenses
     </a>
 
+    {% if user.is_finance or user.is_auditor %}
     <div class="nav-section mt-2">Reports</div>
     <a class="nav-link mb-1" href="{% url 'reports:report_index' %}">
       <i class="bi bi-file-earmark-bar-graph me-2"></i>Reports
     </a>
+    {% endif %}
     {% endif %}
 
     {% if user.is_admin_role %}

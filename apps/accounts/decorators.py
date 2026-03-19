@@ -39,10 +39,10 @@ def finance_required(view_func):
 
 
 def report_required(view_func):
-    """Restrict reports to Admin and Finance Manager."""
+    """Restrict reports to Finance Manager and Auditor."""
     @wraps(view_func)
     def _wrapped(request, *args, **kwargs):
-        if request.user.role not in ("admin", "finance"):
+        if request.user.role not in ("finance", "auditor"):
             messages.error(request, "You do not have permission to access reports.")
             return redirect("accounts:dashboard")
         return view_func(request, *args, **kwargs)

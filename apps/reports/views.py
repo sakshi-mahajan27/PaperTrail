@@ -18,7 +18,7 @@ def report_index(request):
         ("Grant Utilization", reverse("reports:grant_utilization"), "bi-wallet2", "Budget vs. utilized amounts for all grants."),
         ("Financial Summary", reverse("reports:financial_summary"), "bi-bar-chart-line", "High-level financial overview."),
         ("Compliance Status", reverse("reports:compliance_status"), "bi-shield-check", "Current status of all compliance certificates."),
-        ("Expense Ledger", reverse("reports:expense_ledger"), "bi-receipt", "Full chronological list of all expenses."),
+        ("Audit Log (Expense Ledger)", reverse("reports:expense_ledger"), "bi-receipt", "Chronological view of all expenses for audit review."),
     ]
     return render(request, "reports/report_index.html", {"report_cards": report_cards})
 

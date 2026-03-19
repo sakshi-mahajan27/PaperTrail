@@ -12,4 +12,29 @@
     <dt class="col-sm-4">Joined</dt><dd class="col-sm-8">{{ user_obj.date_joined|date:"d M Y" }}</dd>
   </dl>
 </div>
+
+{% if user_obj.is_auditor %}
+<div class="card p-4 mt-3" style="max-width:700px;">
+  <h5 class="fw-bold mb-2">Auditor</h5>
+  <p class="text-muted mb-3">Auditor verifies that financial records are compliant and traceable.</p>
+
+  <h6 class="fw-semibold mb-2">Responsibilities</h6>
+  <ul class="mb-3">
+    <li>Review expenses</li>
+    <li>Verify receipts</li>
+    <li>Check compliance status</li>
+    <li>Review audit logs</li>
+    <li>Download reports</li>
+  </ul>
+
+  <h6 class="fw-semibold mb-2">Permissions</h6>
+  <ul class="mb-0">
+    <li>View-only access to financial data</li>
+    <li>View receipts</li>
+    <li>Access audit logs</li>
+    <li>Generate reports</li>
+    <li>Cannot edit or create records</li>
+  </ul>
+</div>
+{% endif %}
 {% endblock %}

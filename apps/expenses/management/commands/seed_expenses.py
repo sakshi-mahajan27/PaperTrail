@@ -13,9 +13,11 @@ class Command(BaseCommand):
     help = "Seed sample expenses and allocations data (idempotent)."
 
     def handle(self, *args, **options):
-        created_by = User.objects.order_by("id").first()
+        created_by = User.objects.filter(role=User.ROLE_FINANCE).order_by("id").first()
         if not created_by:
-            raise CommandError("No users found. Create a user first (e.g. createsuperuser).")
+            raise CommandError(
+                "No Finance Manager user found. Create a user with role='finance' first."
+            )
 
         active_grants = list(Grant.objects.filter(is_active=True, status=Grant.STATUS_ACTIVE).order_by("id")[:3])
         if not active_grants:
