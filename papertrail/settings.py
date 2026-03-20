@@ -113,3 +113,12 @@ LOGOUT_REDIRECT_URL = "/accounts/login/"
 # Crispy forms
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 CRISPY_TEMPLATE_PACK = "bootstrap5"
+
+# Email configuration
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"  # For development; change to SMTP for production
+DEFAULT_FROM_EMAIL = "noreply@papertrail.ngo"
+# EMAIL_HOST = "smtp.gmail.com"  # Uncomment and configure for production
+# EMAIL_PORT = 587
+# EMAIL_USE_TLS = True
+# EMAIL_HOST_USER = "your-email@gmail.com"
+# EMAIL_HOST_PASSWORD = "your-app-password"

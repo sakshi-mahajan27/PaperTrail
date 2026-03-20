@@ -24,6 +24,7 @@ class ComplianceDocument(models.Model):
     )
     uploaded_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    yellow_alert_sent = models.DateTimeField(null=True, blank=True, help_text="When the yellow 'expiring soon' alert was sent")
 
     class Meta:
         ordering = ["cert_type"]
@@ -38,7 +39,7 @@ class ComplianceDocument(models.Model):
         if self.expiry_date < today:
             return "red"
         delta = (self.expiry_date - today).days
-        if delta <= 30:
+        if delta <= 180:
             return "yellow"
         return "green"
 
