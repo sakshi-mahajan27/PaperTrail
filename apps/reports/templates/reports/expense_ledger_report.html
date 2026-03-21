@@ -31,7 +31,7 @@
   <div class="table-responsive">
     <table class="table mb-0 small">
       <thead class="table-light">
-        <tr><th>#</th><th>Date</th><th>Title</th><th>Amount (₹)</th><th>Grants Allocated</th><th>Recorded By</th><th>Receipt</th></tr>
+        <tr><th>#</th><th>Date</th><th>Title</th><th>Amount (Rs.)</th><th>Grants Allocated</th><th>Recorded By</th><th>Receipt</th></tr>
       </thead>
       <tbody>
         {% for expense in expenses %}
@@ -39,10 +39,10 @@
           <td>{{ forloop.counter }}</td>
           <td>{{ expense.expense_date }}</td>
           <td><a href="{% url 'expenses:expense_detail' expense.pk %}">{{ expense.title|truncatechars:40 }}</a></td>
-          <td>₹{{ expense.total_amount|floatformat:2 }}</td>
+          <td>Rs.{{ expense.total_amount|floatformat:2 }}</td>
           <td>
             {% for alloc in expense.allocations.all %}
-              <span class="badge bg-light text-dark border me-1">{{ alloc.grant.name|truncatechars:18 }} (₹{{ alloc.allocated_amount|floatformat:0 }})</span>
+              <span class="badge bg-light text-dark border me-1" style="white-space:normal;">{{ alloc.grant.name }} (Rs.{{ alloc.allocated_amount|floatformat:0 }})</span>
             {% endfor %}
           </td>
           <td>{{ expense.created_by.username }}</td>

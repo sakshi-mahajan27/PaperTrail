@@ -14,7 +14,7 @@
   <div class="table-responsive">
     <table class="table mb-0">
       <thead class="table-light">
-        <tr><th>#</th><th>Donor</th><th>Type</th><th>Total Expenses (₹)</th></tr>
+        <tr><th>#</th><th>Donor</th><th>Type</th><th>Total Expenses (Rs.)</th></tr>
       </thead>
       <tbody>
         {% for row in rows %}
@@ -22,7 +22,7 @@
           <td>{{ forloop.counter }}</td>
           <td><a href="{% url 'donors:donor_detail' row.donor.pk %}">{{ row.donor.name }}</a></td>
           <td>{{ row.donor.get_donor_type_display }}</td>
-          <td>₹{{ row.total|floatformat:2 }}</td>
+          <td>Rs.{{ row.total|floatformat:2 }}</td>
         </tr>
         {% empty %}
         <tr><td colspan="4" class="text-muted text-center py-4">No data.</td></tr>
@@ -32,7 +32,7 @@
       <tfoot class="table-light">
         <tr>
           <th colspan="3">Grand Total</th>
-          <th>₹{% with total=0 %}{% for r in rows %}{% endfor %}{{ rows|length }}{% endwith %} —</th>
+          <th>Rs.{{ grand_total|floatformat:2 }}</th>
         </tr>
       </tfoot>
       {% endif %}

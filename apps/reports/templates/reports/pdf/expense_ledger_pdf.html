@@ -7,9 +7,9 @@
     <tr>
       <th style="width:4%">#</th>
       <th style="width:10%">Date</th>
-      <th style="width:25%">Title</th>
-      <th style="width:12%;text-align:right">Amount (₹)</th>
-      <th style="width:30%">Grant Allocations</th>
+      <th style="width:20%">Title</th>
+      <th style="width:12%;text-align:right">Amount (Rs.)</th>
+      <th style="width:35%">Grant Allocations</th>
       <th style="width:12%">Recorded By</th>
       <th style="width:7%">Receipt</th>
     </tr>
@@ -20,12 +20,12 @@
       <td>{{ forloop.counter }}</td>
       <td>{{ expense.expense_date }}</td>
       <td>{{ expense.title|truncatechars:45 }}</td>
-      <td style="text-align:right">{{ expense.total_amount|floatformat:2 }}</td>
-      <td>
-        {% for alloc in expense.allocations.all %}
-          {{ alloc.grant.name|truncatechars:20 }} (₹{{ alloc.allocated_amount|floatformat:0 }}){% if not forloop.last %}, {% endif %}
-        {% endfor %}
-      </td>
+          <td style="text-align:right">{{ expense.total_amount|floatformat:2 }}</td>
+          <td>
+            {% for alloc in expense.allocations.all %}
+              <span style="display:block;white-space:normal;word-wrap:break-word;margin-bottom:4px;">{{ alloc.grant.name }} (Rs.{{ alloc.allocated_amount|floatformat:0 }})</span>
+            {% endfor %}
+          </td>
       <td>{{ expense.created_by.username }}</td>
       <td style="text-align:center">{% if expense.receipt %}Yes{% else %}<span style="color:#dc2626;">No</span>{% endif %}</td>
     </tr>

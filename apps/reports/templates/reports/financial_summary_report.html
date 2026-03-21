@@ -14,19 +14,19 @@
   <div class="col-md-4">
     <div class="card p-4 text-center border-start border-4 border-primary">
       <div class="text-muted small">Total Grants Awarded</div>
-      <div class="fs-3 fw-bold text-primary">₹{{ total_grants|floatformat:2 }}</div>
+      <div class="fs-3 fw-bold text-primary">Rs.{{ total_grants|floatformat:2 }}</div>
     </div>
   </div>
   <div class="col-md-4">
     <div class="card p-4 text-center border-start border-4 border-danger">
       <div class="text-muted small">Total Expenses Recorded</div>
-      <div class="fs-3 fw-bold text-danger">₹{{ total_expenses|floatformat:2 }}</div>
+      <div class="fs-3 fw-bold text-danger">Rs.{{ total_expenses|floatformat:2 }}</div>
     </div>
   </div>
   <div class="col-md-4">
     <div class="card p-4 text-center border-start border-4 border-success">
       <div class="text-muted small">Net Unspent</div>
-      <div class="fs-3 fw-bold text-success">₹{{ net_unspent|floatformat:2 }}</div>
+      <div class="fs-3 fw-bold text-success">Rs.{{ net_unspent|floatformat:2 }}</div>
     </div>
   </div>
 </div>
@@ -42,9 +42,9 @@
         <tr>
           <td>{{ grant.name }}</td>
           <td>{{ grant.donor.name }}</td>
-          <td>₹{{ grant.total_amount|floatformat:2 }}</td>
-          <td>₹{{ grant.utilized_amount|floatformat:2 }}</td>
-          <td>₹{{ grant.remaining_amount|floatformat:2 }}</td>
+          <td>Rs.{{ grant.total_amount|floatformat:2 }}</td>
+          <td>Rs.{{ grant.utilized_amount|floatformat:2 }}</td>
+          <td>Rs.{{ grant.remaining_amount|floatformat:2 }}</td>
         </tr>
         {% endfor %}
       </tbody>

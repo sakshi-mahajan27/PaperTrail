@@ -14,7 +14,7 @@
   <div class="table-responsive">
     <table class="table mb-0">
       <thead class="table-light">
-        <tr><th>#</th><th>Grant</th><th>Donor</th><th>Status</th><th>Budget (₹)</th><th>Utilized (₹)</th><th>Remaining (₹)</th><th>Burn Rate</th></tr>
+        <tr><th>#</th><th>Grant</th><th>Donor</th><th>Status</th><th>Budget (Rs.)</th><th>Utilized (Rs.)</th><th>Remaining (Rs.)</th><th>Burn Rate</th></tr>
       </thead>
       <tbody>
         {% for grant in grants %}
@@ -23,9 +23,9 @@
           <td><a href="{% url 'grants:grant_detail' grant.pk %}">{{ grant.name }}</a></td>
           <td>{{ grant.donor.name }}</td>
           <td><span class="badge bg-secondary">{{ grant.get_status_display }}</span></td>
-          <td>₹{{ grant.total_amount|floatformat:2 }}</td>
-          <td>₹{{ grant.utilized_amount|floatformat:2 }}</td>
-          <td class="{% if grant.remaining_amount < 0 %}text-danger{% endif %}">₹{{ grant.remaining_amount|floatformat:2 }}</td>
+          <td>Rs.{{ grant.total_amount|floatformat:2 }}</td>
+          <td>Rs.{{ grant.utilized_amount|floatformat:2 }}</td>
+          <td class="{% if grant.remaining_amount < 0 %}text-danger{% endif %}">Rs.{{ grant.remaining_amount|floatformat:2 }}</td>
           <td>
             <div class="d-flex align-items-center gap-2">
               <div class="progress flex-grow-1" style="height:8px;min-width:60px;">

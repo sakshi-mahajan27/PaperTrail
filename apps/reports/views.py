@@ -35,7 +35,8 @@ def donor_expense_report(request):
             grant__donor=donor, expense__is_active=True
         ).aggregate(t=Sum("allocated_amount"))["t"] or 0
         rows.append({"donor": donor, "total": total})
-    return render(request, "reports/donor_expense_report.html", {"rows": rows})
+    grand_total = sum(r["total"] for r in rows)
+    return render(request, "reports/donor_expense_report.html", {"rows": rows, "grand_total": grand_total})
 
 
 @login_required
