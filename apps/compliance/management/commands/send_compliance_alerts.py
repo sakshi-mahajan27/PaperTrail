@@ -1,38 +1,27 @@
 from django.core.management.base import BaseCommand
 from django.utils import timezone
+from datetime import timedelta
+
 from apps.compliance.models import ComplianceDocument
-from apps.compliance.utils import send_yellow_alert_email
+from apps.compliance.tasks import send_yellow_alert_email_task
 
 
 class Command(BaseCommand):
-    help = "Check compliance documents and send expiration alerts for documents in yellow status"
+    help = "Enqueue compliance expiration alert tasks for documents in yellow status"
 
     def handle(self, *args, **options):
-        # Get all documents in yellow status that haven't had an alert sent yet
+        today = timezone.localdate()
+        threshold = today + timedelta(days=180)
+
         yellow_docs = ComplianceDocument.objects.filter(
-            yellow_alert_sent__isnull=True
+            yellow_alert_sent__isnull=True,
+            expiry_date__gte=today,
+            expiry_date__lte=threshold,
         )
-        
-        alert_count = 0
+
+        enqueued = 0
         for doc in yellow_docs:
-            # Double-check the status is actually yellow
-            if doc.status == "yellow":
-                if send_yellow_alert_email(doc):
-                    doc.yellow_alert_sent = timezone.now()
-                    doc.save()
-                    alert_count += 1
-                    self.stdout.write(
-                        self.style.SUCCESS(
-                            f"Alert sent for {doc.get_cert_type_display()}"
-                        )
-                    )
-                else:
-                    self.stdout.write(
-                        self.style.ERROR(
-                            f"Failed to send alert for {doc.get_cert_type_display()}"
-                        )
-                    )
-        
-        self.stdout.write(
-            self.style.SUCCESS(f"Sent {alert_count} expiration alerts")
-        )
+            send_yellow_alert_email_task.delay(doc.id)
+            enqueued += 1
+
+        self.stdout.write(self.style.SUCCESS(f"Enqueued {enqueued} alert tasks"))

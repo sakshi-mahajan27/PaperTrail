@@ -14,6 +14,8 @@ ENV/
 local_settings.py
 db.sqlite3
 db.sqlite3-journal
+celerybeat-schedule
+*.sqlite3
 media/
 staticfiles/
 

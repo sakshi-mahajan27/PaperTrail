@@ -2,7 +2,7 @@ from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 from django.utils import timezone
 from .models import ComplianceDocument
-from .utils import send_yellow_alert_email
+from .tasks import send_yellow_alert_email_task
 
 @receiver(pre_save, sender=ComplianceDocument)
 def cache_previous_status(sender, instance, **kwargs):
@@ -33,7 +33,5 @@ def send_expiry_alert(sender, instance, created, **kwargs):
     # If document is currently yellow and it either was just created
     # or transitioned from a different status, send the alert.
     if instance.status == "yellow" and (created or prev_status != "yellow"):
-        if send_yellow_alert_email(instance):
-            ComplianceDocument.objects.filter(pk=instance.pk).update(
-                yellow_alert_sent=timezone.now()
-            )
+        # Enqueue the async task so sends are visible in Celery/Flower.
+        send_yellow_alert_email_task.delay(instance.id)
