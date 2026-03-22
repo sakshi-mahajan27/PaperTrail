@@ -1,0 +1,417 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Audit Logs - PaperTrail{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1>Audit Logs</h1>
+            <p class="text-muted">View all system changes and track modifications made to critical records.</p>
+        </div>
+        <div class="col-md-4 text-end">
+            <span class="badge bg-secondary">Total: {{ page_obj.paginator.count }} logs</span>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="card mb-4">
+        <div class="card-header bg-light">
+            <h5 class="mb-0">Filters</h5>
+        </div>
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <!-- Search (inline) -->
+                <div class="col-md-4">
+                    <label for="search" class="form-label">Search by Object or User</label>
+                    <div class="input-group">
+                        <input
+                            type="text"
+                            class="form-control"
+                            id="search"
+                            name="search"
+                            placeholder="e.g., Grant name, User name..."
+                            value="{{ search_query }}"
+                        >
+                    </div>
+                </div>
+
+                <!-- Action Filter -->
+                <div class="col-md-3">
+                    <label for="action" class="form-label">Action</label>
+                    <select class="form-select" id="action" name="action">
+                        <option value="">All Actions</option>
+                        {% for value, label in action_choices %}
+                            <option value="{{ value }}" {% if action_filter == value %}selected{% endif %}>
+                                {{ label }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Model Filter -->
+                <div class="col-md-3">
+                    <label for="model" class="form-label">Model</label>
+                    <select class="form-select" id="model" name="model">
+                        <option value="">All Models</option>
+                        {% for model in models %}
+                            <option value="{{ model.model }}" {% if model_filter == model.model %}selected{% endif %}>
+                                {{ model.get_model_display|default:model.model|title }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Buttons -->
+                <div class="col-md-2 d-flex align-items-end gap-2">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-search"></i> Search
+                    </button>
+                    <a href="{% url 'audit:log_list' %}" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-counterclockwise"></i>
+                    </a>
+                </div>
+
+            </form>
+        </div>
+    </div>
+
+    <!-- Audit Logs Table -->
+    <div class="card">
+        <div class="table-responsive">
+            <table class="table table-hover table-sm mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th style="width: 15%;">Timestamp</th>
+                        <th style="width: 10%;">Action</th>
+                        <th style="width: 30%;">Object</th>
+                        <th style="width: 15%;">Model</th>
+                        <th style="width: 20%;">Changed By</th>
+                        <th style="width: 10%;" class="text-center">Details</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if page_obj %}
+                        {% for log in page_obj %}
+                            <tr>
+                                <!-- Timestamp -->
+                                <td>
+                                    <small class="text-muted">
+                                        {{ log.timestamp|date:"Y-m-d H:i:s" }}
+                                    </small>
+                                </td>
+
+                                <!-- Action Badge -->
+                                <td>
+                                    {% if log.action == "created" %}
+                                        <span class="badge bg-success">
+                                            <i class="bi bi-plus-circle"></i> Created
+                                        </span>
+                                    {% elif log.action == "updated" %}
+                                        <span class="badge bg-primary">
+                                            <i class="bi bi-pencil"></i> Updated
+                                        </span>
+                                    {% elif log.action == "deleted" %}
+                                        <span class="badge bg-danger">
+                                            <i class="bi bi-trash"></i> Deleted
+                                        </span>
+                                    {% endif %}
+                                </td>
+
+                                <!-- Object Representation -->
+                                <td>
+                                    <strong>{{ log.object_repr }}</strong>
+                                    <br>
+                                    <small class="text-muted">#{{ log.object_id }}</small>
+                                </td>
+
+                                <!-- Model Name -->
+                                <td>
+                                    <span class="badge bg-secondary">{{ log.model_label }}</span>
+                                </td>
+
+                                <!-- Changed By -->
+                                <td>
+                                    {% if log.changed_by %}
+                                        <small>
+                                            {{ log.changed_by.get_full_name|default:log.changed_by.username }}
+                                        </small>
+                                        <br>
+                                        <small class="text-muted">{{ log.changed_by.get_role_display }}</small>
+                                    {% else %}
+                                        <small class="text-muted">System</small>
+                                    {% endif %}
+                                </td>
+
+                                <!-- Details Button -->
+                                <td class="text-center">
+                                    <button
+                                        class="btn btn-sm btn-outline-primary"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#detailsModal"
+                                        onclick="loadAuditDetails({{ log.id }})"
+                                        title="View details"
+                                    >
+                                        <i class="bi bi-eye"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="6" class="text-center py-4 text-muted">
+                                No audit logs found matching your criteria.
+                            </td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    {% if page_obj.has_other_pages %}
+        <nav aria-label="Page navigation" class="mt-4">
+            <ul class="pagination justify-content-center">
+                <!-- Previous -->
+                {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a
+                            class="page-link"
+                            href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}{% if action_filter %}&action={{ action_filter }}{% endif %}{% if model_filter %}&model={{ model_filter }}{% endif %}"
+                        >
+                            First
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a
+                            class="page-link"
+                            href="?page={{ page_obj.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if action_filter %}&action={{ action_filter }}{% endif %}{% if model_filter %}&model={{ model_filter }}{% endif %}"
+                        >
+                            Previous
+                        </a>
+                    </li>
+                {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link">First</span>
+                    </li>
+                    <li class="page-item disabled">
+                        <span class="page-link">Previous</span>
+                    </li>
+                {% endif %}
+
+                <!-- Page Numbers -->
+                {% for num in page_obj.paginator.page_range %}
+                    {% if page_obj.number == num %}
+                        <li class="page-item active">
+                            <span class="page-link">
+                                {{ num }}
+                                <span class="visually-hidden">(current)</span>
+                            </span>
+                        </li>
+                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                        <li class="page-item">
+                            <a
+                                class="page-link"
+                                href="?page={{ num }}{% if search_query %}&search={{ search_query }}{% endif %}{% if action_filter %}&action={{ action_filter }}{% endif %}{% if model_filter %}&model={{ model_filter }}{% endif %}"
+                            >
+                                {{ num }}
+                            </a>
+                        </li>
+                    {% elif num == 1 or num == page_obj.paginator.num_pages %}
+                        <li class="page-item">
+                            <a
+                                class="page-link"
+                                href="?page={{ num }}{% if search_query %}&search={{ search_query }}{% endif %}{% if action_filter %}&action={{ action_filter }}{% endif %}{% if model_filter %}&model={{ model_filter }}{% endif %}"
+                            >
+                                {{ num }}
+                            </a>
+                        </li>
+                    {% elif num == 2 or num == page_obj.paginator.num_pages|add:'-1' %}
+                        <li class="page-item disabled">
+                            <span class="page-link">...</span>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+
+                <!-- Next -->
+                {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a
+                            class="page-link"
+                            href="?page={{ page_obj.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if action_filter %}&action={{ action_filter }}{% endif %}{% if model_filter %}&model={{ model_filter }}{% endif %}"
+                        >
+                            Next
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a
+                            class="page-link"
+                            href="?page={{ page_obj.paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}{% if action_filter %}&action={{ action_filter }}{% endif %}{% if model_filter %}&model={{ model_filter }}{% endif %}"
+                        >
+                            Last
+                        </a>
+                    </li>
+                {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link">Next</span>
+                    </li>
+                    <li class="page-item disabled">
+                        <span class="page-link">Last</span>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+    {% endif %}
+</div>
+
+<!-- Details Modal -->
+<div class="modal fade" id="detailsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Audit Log Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="modalContent">
+                <div class="text-center">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function loadAuditDetails(logId) {
+        const modalContent = document.getElementById('modalContent');
+
+        // Fetch the audit log details
+        fetch(`{% url 'audit:log_detail' 0 %}`.replace('0', logId))
+            .then(response => {
+                if (!response.ok) throw new Error('Failed to load details');
+                return response.json();
+            })
+            .then(data => {
+                modalContent.innerHTML = buildDetailsHTML(data);
+            })
+            .catch(error => {
+                modalContent.innerHTML = `
+                    <div class="alert alert-danger">
+                        Error loading details: ${error.message}
+                    </div>
+                `;
+            });
+    }
+
+    function buildDetailsHTML(data) {
+        let html = `
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <h6 class="text-muted">Action</h6>
+                    <p>
+        `;
+
+        // Action badge
+        if (data.action_raw === 'created') {
+            html += `<span class="badge bg-success"><i class="bi bi-plus-circle"></i> ${data.action}</span>`;
+        } else if (data.action_raw === 'updated') {
+            html += `<span class="badge bg-primary"><i class="bi bi-pencil"></i> ${data.action}</span>`;
+        } else if (data.action_raw === 'deleted') {
+            html += `<span class="badge bg-danger"><i class="bi bi-trash"></i> ${data.action}</span>`;
+        }
+
+        html += `
+                    </p>
+                </div>
+                <div class="col-md-6">
+                    <h6 class="text-muted">Model</h6>
+                    <p><span class="badge bg-secondary">${data.model}</span></p>
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <h6 class="text-muted">Changed By</h6>
+                    <p><strong>${data.user}</strong></p>
+                </div>
+                <div class="col-md-6">
+                    <h6 class="text-muted">Object</h6>
+                    <p><code>${data.object}</code></p>
+                </div>
+            </div>
+        `;
+
+        // Changes section
+        if (data.changes && Object.keys(data.changes).length > 0) {
+            html += `
+                <div class="row">
+                    <div class="col-12">
+                        <h6 class="text-muted mb-3">Changes</h6>
+                        <div class="table-responsive">
+                            <table class="table table-sm table-bordered">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th style="width: 30%;">Field</th>
+                                        <th style="width: 35%;">Old Value</th>
+                                        <th style="width: 35%;">New Value</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+            `;
+
+            for (const [field, change] of Object.entries(data.changes)) {
+                html += `
+                                    <tr>
+                                        <td><strong>${field}</strong></td>
+                                        <td>
+                                            <code class="text-danger">${escapeHtml(change.old || '(empty)')}</code>
+                                        </td>
+                                        <td>
+                                            <code class="text-success">${escapeHtml(change.new || '(empty)')}</code>
+                                        </td>
+                                    </tr>
+                `;
+            }
+
+            html += `
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            `;
+        } else if (data.action_raw === 'created') {
+            html += `
+                <div class="alert alert-info">
+                    <strong>New Record Created</strong> - No previous values to compare.
+                </div>
+            `;
+        } else if (data.action_raw === 'deleted') {
+            html += `
+                <div class="alert alert-warning">
+                    <strong>Record Deleted</strong> - No changes recorded for deletions.
+                </div>
+            `;
+        } else {
+            html += `
+                <div class="alert alert-info">
+                    No field changes recorded for this update.
+                </div>
+            `;
+        }
+
+        return html;
+    }
+
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+</script>
+{% endblock %}

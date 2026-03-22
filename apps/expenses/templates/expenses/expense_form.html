@@ -37,6 +37,24 @@
         </div>
         <p class="text-muted small">Allocations must sum to the total expense amount.</p>
 
+        {% if formset.non_form_errors %}
+          <div class="alert alert-danger mb-3">
+            <strong>Allocation Errors:</strong>
+            {{ formset.non_form_errors }}
+          </div>
+        {% endif %}
+
+        {% if alloc_errors %}
+          <div class="alert alert-danger mb-3">
+            <strong>Allocation Errors:</strong>
+            <ul class="mb-0">
+              {% for err in alloc_errors %}
+                <li>{{ err }}</li>
+              {% endfor %}
+            </ul>
+          </div>
+        {% endif %}
+
         {{ formset.management_form }}
         <div id="allocation-container">
           {% for alloc_form in formset %}

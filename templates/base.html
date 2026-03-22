@@ -63,6 +63,13 @@
       <i class="bi bi-file-earmark-bar-graph me-2"></i>Reports
     </a>
     {% endif %}
+
+    {% if user.is_auditor %}
+    <div class="nav-section mt-2">Audit</div>
+    <a class="nav-link mb-1" href="{% url 'audit:log_list' %}">
+      <i class="bi bi-file-text me-2"></i>Audit Logs
+    </a>
+    {% endif %}
     {% endif %}
 
     {% if user.is_admin_role %}

@@ -21,6 +21,9 @@ class UserCreateForm(UserCreationForm):
         super().__init__(*args, **kwargs)
         for field in self.fields.values():
             field.widget.attrs.setdefault("class", "form-control")
+        # Render the boolean `is_active` as a Bootstrap-style checkbox/switch
+        if "is_active" in self.fields:
+            self.fields["is_active"].widget = forms.CheckboxInput(attrs={"class": "form-check-input"})
 
 
 class UserUpdateForm(UserChangeForm):
@@ -34,3 +37,6 @@ class UserUpdateForm(UserChangeForm):
         super().__init__(*args, **kwargs)
         for field in self.fields.values():
             field.widget.attrs.setdefault("class", "form-control")
+        # Render the boolean `is_active` as a Bootstrap-style checkbox/switch
+        if "is_active" in self.fields:
+            self.fields["is_active"].widget = forms.CheckboxInput(attrs={"class": "form-check-input"})

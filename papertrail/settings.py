@@ -32,6 +32,7 @@ INSTALLED_APPS = [
     "crispy_bootstrap5",
     # Project apps
     "apps.accounts",
+    "apps.audit",
     "apps.compliance",
     "apps.donors",
     "apps.grants",
@@ -50,6 +51,8 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    # Audit logging middleware
+    "apps.audit.signals.AuditMiddlewareUser",
 ]
 
 ROOT_URLCONF = "papertrail.urls"
