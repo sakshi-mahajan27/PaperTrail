@@ -1,3 +1,76 @@
+"""
+Audit logging system using Django signals.
+
+This module implements comprehensive audit trail functionality by hooking into
+Django's model signals (pre_save, post_save, post_delete) for critical models:
+- Grant (fundraising agreements)
+- Expense (fund utilization)
+- ExpenseAllocation (allocating expenses to grants)
+- ComplianceDocument (certificates)
+- Donor (fundraiser registry)
+
+ARCHITECTURE:
+
+1. Thread-Local Storage Pattern:
+   -----
+   The system uses thread-local storage (_thread_locals) to track:
+   - Current authenticated user (set by AuditMiddlewareUser)
+   - Old instance states (captured before save for change detection)
+
+   Why thread-local? Because Django signal handlers run in the same thread as
+   the view, allowing us to access the request.user without passing it explicitly.
+
+2. Signal Flow (on model.save()):
+   -----
+   a) pre_save signal fires → capture_*_old_state() stores old instance in thread-local
+   b) Model is saved to database
+   c) post_save signal fires → log_*_change() compares old vs new
+   d) Changes are written to AuditLog table
+   e) Cleanup: clear_old_instance() removes temporary data from thread-local
+
+3. Change Detection:
+   -----
+   get_field_changes() compares old and new instances field-by-field and
+   returns a dict: {"field": {"old": "val1", "new": "val2"}}
+   This dict is stored as JSON in AuditLog.changes field.
+
+4. User Tracking:
+   -----
+   get_current_user() retrieves the authenticated user from thread-local.
+   If user is None or AnonymousUser, audit logging is skipped (system/management tasks).
+
+SETUP REQUIRED:
+
+Add to settings.py MIDDLEWARE:
+    'apps.audit.signals.AuditMiddlewareUser',
+
+This ensures set_current_user() is called for every request.
+
+EXAMPLE LOG ENTRY:
+
+    action='updated'
+    object_repr='Training Grant - $50,000'
+    changed_by=User(john_admin)
+    timestamp=2025-03-23 14:30:00
+    changes={
+        "total_amount": {"old": "50000", "new": "55000"},
+        "status": {"old": "pending", "new": "active"}
+    }
+
+QUERIES:
+
+    # View all changes made by user
+    AuditLog.objects.filter(changed_by__username='john_admin')
+
+    # View changes to a specific grant
+    AuditLog.objects.filter(
+        content_type__model='grant',
+        object_id=42
+    ).order_by('-timestamp')
+
+    # View only updates (exclude creates/deletes)
+    AuditLog.objects.filter(action='updated')
+"""
 from django.db.models.signals import pre_save, post_save, post_delete
 from django.dispatch import receiver
 from django.contrib.auth.models import AnonymousUser
@@ -16,24 +89,79 @@ _thread_locals = threading.local()
 
 
 def get_current_user():
-    """Get the current user from thread-local storage"""
+    """
+    Retrieve the currently authenticated user from thread-local storage.
+
+    This function is called by signal handlers to determine who made a change.
+    The user is set in thread-local storage by AuditMiddlewareUser middleware.
+
+    Returns:
+        User: The authenticated user, or None if not available
+
+    Notes:
+        - Returns None if called outside HTTP request context (management tasks)
+        - Returns None if user is AnonymousUser (unauthenticated)
+        - Thread-safe: each thread has its own _thread_locals dict
+    """
     return getattr(_thread_locals, 'user', None)
 
 
 def set_current_user(user):
-    """Set the current user in thread-local storage"""
+    """
+    Store the currently authenticated user in thread-local storage.
+
+    This function is called by AuditMiddlewareUser middleware at the start
+    of each HTTP request, and cleared at the end.
+
+    Args:
+        user: The User instance to store, or None to clear
+
+    Notes:
+        - Called automatically by middleware; do not call directly
+        - Thread-safe: each thread has its own _thread_locals dict
+    """
     _thread_locals.user = user
 
 
 def get_old_instance(model_class, pk):
-    """Get old instance from thread-local storage"""
+    """
+    Retrieve the saved old instance from thread-local storage.
+
+    Before any model instance is saved, the pre_save signal captures the old
+    state. This function retrieves that saved state for later comparison.
+
+    Args:
+        model_class: The Django model class (e.g., Grant, Expense)
+        pk (int): The primary key of the instance
+
+    Returns:
+        Model instance: The saved old state, or None if not found
+
+    Internal:
+        Uses a composite key: f"{model_class.__name__}_{pk}"
+    """
     old_instances = getattr(_thread_locals, 'old_instances', {})
     key = f"{model_class.__name__}_{pk}"
     return old_instances.get(key)
 
 
 def set_old_instance(model_class, pk, instance):
-    """Store old instance in thread-local storage before save"""
+    """
+    Save the current instance state before modification.
+
+    Called by pre_save signal handlers to capture the current state of an
+    instance before it's saved, allowing later comparison with the new state.
+
+    Args:
+        model_class: The Django model class (e.g., Grant, Expense)
+        pk (int): The primary key of the instance
+        instance: The model instance to save, or None
+
+    Notes:
+        - Makes a deep copy to ensure independence from later changes
+        - Uses composite key: f"{model_class.__name__}_{pk}"
+        - Only called for updates (instance.pk must exist)
+    """
     if not hasattr(_thread_locals, 'old_instances'):
         _thread_locals.old_instances = {}
     key = f"{model_class.__name__}_{pk}"
@@ -41,7 +169,20 @@ def set_old_instance(model_class, pk, instance):
 
 
 def clear_old_instance(model_class, pk):
-    """Clear old instance from thread-local storage after processing"""
+    """
+    Remove the saved instance state from thread-local storage.
+
+    Called after processing by post_save signal to clean up temporary data.
+    Prevents memory leaks in long-running processes.
+
+    Args:
+        model_class: The Django model class (e.g., Grant, Expense)
+        pk (int): The primary key of the instance
+
+    Notes:
+        - Must match set_old_instance() composite key format
+        - Safe to call multiple times or if key doesn't exist
+    """
     if not hasattr(_thread_locals, 'old_instances'):
         return
     key = f"{model_class.__name__}_{pk}"
@@ -51,16 +192,50 @@ def clear_old_instance(model_class, pk):
 class AuditMiddlewareUser:
     """
     Middleware to set current user in thread-local storage.
-    Add this to your middleware list in settings.py
+
+    This middleware is required for the audit system to function. It captures
+    the authenticated user at the start of each HTTP request and stores it in
+    thread-local storage, making it available to signal handlers.
+
+    Lifecycle:
+        1. __init__: Called once at server startup
+        2. __call__: Called for every HTTP request
+           - Extract request.user
+           - Store in thread-local (_thread_locals.user)
+           - Process request/response
+           - Clear thread-local
+
+    Installation:
+        Add 'apps.audit.signals.AuditMiddlewareUser' to settings.py MIDDLEWARE,
+        near the top but AFTER AuthenticationMiddleware.
+
+    Example settings.py:
+        MIDDLEWARE = [
+            'django.middleware.security.SecurityMiddleware',
+            'django.contrib.sessions.middleware.SessionMiddleware',
+            'django.middleware.common.CommonMiddleware',
+            'django.middleware.csrf.CsrfViewMiddleware',
+            'django.contrib.auth.middleware.AuthenticationMiddleware',
+            'apps.audit.signals.AuditMiddlewareUser',  # <-- Add here
+            'django.contrib.messages.middleware.MessageMiddleware',
+        ]
+
+    Notes:
+        - Gracefully handles unauthenticated/Anonymous users (logs None)
+        - Thread-safe: each request thread has isolated storage
+        - Cleanup happens automatically in __call__, preventing leaks
     """
 
     def __init__(self, get_response):
         self.get_response = get_response
 
     def __call__(self, request):
+        # Extract authenticated user or None if unauthenticated
         user = request.user if request.user.is_authenticated else None
         set_current_user(user)
+        # Process the request
         response = self.get_response(request)
+        # Clean up thread-local storage
         set_current_user(None)
         return response
 
@@ -68,7 +243,44 @@ class AuditMiddlewareUser:
 def get_field_changes(instance, old_instance):
     """
     Compare old and new instances to detect what fields changed.
-    Returns a dict of {field_name: {'old': old_value, 'new': new_value}}
+
+    This function performs field-by-field comparison between old and new states,
+    returning only the fields that actually changed. It handles serialization
+    of datetime fields and ignores auto-managed fields.
+
+    Args:
+        instance: The new/updated model instance
+        old_instance: The old model instance (before changes), or None for creates
+
+    Returns:
+        dict: Field changes in format:
+            {"field_name": {"old": "value1", "new": "value2"}, ...}
+            Returns empty dict if no changes detected.
+
+    Excluded Fields (not tracked):
+        - id: Primary key (never changes)
+        - created_at: Auto-generated on create
+        - updated_at: Auto-updated on every save
+        - yellow_alert_sent: Compliance-specific auto-field
+        - Relation fields (ForeignKey, ManyToMany): Tracked separately if needed
+
+    Serialization:
+        - datetime / date objects: Converted to ISO format string
+        - None values: Converted to string 'None'
+        - All other types: Converted to string
+
+    Usage:
+        # This is called internally by signal handlers
+        changes = get_field_changes(new_expense, old_expense)
+        # changes = {
+        #     'title': {'old': 'Office Supplies', 'new': 'Office Supplies - Updated'},
+        #     'total_amount': {'old': '1000.00', 'new': '1200.00'}
+        # }
+
+    Notes:
+        - Only called during UPDATE operations, not CREATE
+        - If old_instance is None, all fields are treated as new (None -> value)
+        - Handles AttributeError gracefully if accessing field fails
     """
     changes = {}
 
@@ -87,7 +299,7 @@ def get_field_changes(instance, old_instance):
                 old_value = None
             new_value = getattr(instance, field.name, None)
 
-            # Convert values to serializable format
+            # Convert values to serializable format (datetime -> ISO string)
             if hasattr(old_value, 'isoformat'):  # datetime/date objects
                 old_value = old_value.isoformat() if old_value else None
             if hasattr(new_value, 'isoformat'):
@@ -100,6 +312,7 @@ def get_field_changes(instance, old_instance):
                     'new': str(new_value) if new_value is not None else None,
                 }
         except (AttributeError, ObjectDoesNotExist):
+            # Skip fields that can't be accessed (e.g., deleted FK targets)
             pass
 
     return changes
