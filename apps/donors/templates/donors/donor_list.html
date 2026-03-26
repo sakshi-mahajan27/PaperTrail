@@ -1,7 +1,10 @@
 {% extends "base.html" %}
+{% load static %}
 {% block title %}Donors{% endblock %}
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
+<link href="{% static 'css/list-pages.css' %}" rel="stylesheet">
+
+<div class="list-header">
   <h4 class="fw-bold mb-0"><i class="bi bi-people me-2"></i>Donors</h4>
   {% if user.can_write %}
   <a href="{% url 'donors:donor_create' %}" class="btn btn-primary btn-sm">
@@ -11,7 +14,7 @@
 </div>
 
 <!-- Filters -->
-<form method="get" class="row g-2 mb-4">
+<form method="get" class="row g-2 mb-4 filter-form">
   <div class="col-md-5">
     <input type="text" name="q" value="{{ search_q }}" class="form-control form-control-sm" placeholder="Search by name…">
   </div>
@@ -33,20 +36,29 @@
   <div class="table-responsive">
     <table class="table table-hover mb-0">
       <thead class="table-light">
-        <tr><th>Name</th><th>Type</th><th>Email</th><th>Country</th><th>Grants</th><th></th></tr>
+        <tr>
+          <th>Name</th>
+          <th class="table-hide-mobile">Type</th>
+          <th class="table-hide-mobile">Email</th>
+          <th class="table-hide-mobile">Country</th>
+          <th class="table-hide-mobile">Grants</th>
+          <th></th>
+        </tr>
       </thead>
       <tbody>
         {% for donor in donors %}
         <tr>
           <td><a href="{% url 'donors:donor_detail' donor.pk %}">{{ donor.name }}</a></td>
-          <td>{{ donor.get_donor_type_display }}</td>
-          <td>{{ donor.email|default:"—" }}</td>
-          <td>{{ donor.country }}</td>
-          <td><span class="badge bg-secondary">{{ donor.grants.count }}</span></td>
+          <td class="table-hide-mobile">{{ donor.get_donor_type_display }}</td>
+          <td class="table-hide-mobile">{{ donor.email|default:"—" }}</td>
+          <td class="table-hide-mobile">{{ donor.country }}</td>
+          <td class="table-hide-mobile"><span class="badge bg-secondary">{{ donor.grants.count }}</span></td>
           <td class="text-end">
             {% if user.can_write %}
-            <a href="{% url 'donors:donor_edit' donor.pk %}" class="btn btn-sm btn-outline-secondary">Edit</a>
-            <a href="{% url 'donors:donor_delete' donor.pk %}" class="btn btn-sm btn-outline-danger">Remove</a>
+            <div class="action-buttons">
+              <a href="{% url 'donors:donor_edit' donor.pk %}" class="btn btn-sm btn-outline-secondary">Edit</a>
+              <a href="{% url 'donors:donor_delete' donor.pk %}" class="btn btn-sm btn-outline-danger">Remove</a>
+            </div>
             {% endif %}
           </td>
         </tr>

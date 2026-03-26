@@ -1,7 +1,10 @@
 {% extends "base.html" %}
+{% load static %}
 {% block title %}Expenses{% endblock %}
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
+<link href="{% static 'css/list-pages.css' %}" rel="stylesheet">
+
+<div class="list-header">
   <h4 class="fw-bold mb-0"><i class="bi bi-receipt me-2"></i>Expenses</h4>
   {% if user.can_write %}
   <a href="{% url 'expenses:expense_create' %}" class="btn btn-primary btn-sm">
@@ -13,28 +16,38 @@
   <div class="table-responsive">
     <table class="table table-hover mb-0">
       <thead class="table-light">
-        <tr><th>Title</th><th>Amount</th><th>Date</th><th>Grants</th><th>Receipt</th><th>Recorded By</th><th></th></tr>
+        <tr>
+          <th>Title</th>
+          <th class="table-hide-mobile">Amount</th>
+          <th class="table-hide-mobile">Date</th>
+          <th class="table-hide-mobile">Grants</th>
+          <th class="table-hide-mobile">Receipt</th>
+          <th class="table-hide-mobile">Recorded By</th>
+          <th></th>
+        </tr>
       </thead>
       <tbody>
         {% for expense in expenses %}
         <tr>
           <td><a href="{% url 'expenses:expense_detail' expense.pk %}">{{ expense.title|truncatechars:45 }}</a></td>
-          <td>₹{{ expense.total_amount|floatformat:2 }}</td>
-          <td>{{ expense.expense_date }}</td>
-          <td>
+          <td class="table-hide-mobile">₹{{ expense.total_amount|floatformat:2 }}</td>
+          <td class="table-hide-mobile">{{ expense.expense_date }}</td>
+          <td class="table-hide-mobile">
             {% for alloc in expense.allocations.all %}
               <span class="badge bg-light text-dark border">{{ alloc.grant.name|truncatechars:20 }}</span>
             {% endfor %}
           </td>
-          <td>
+          <td class="table-hide-mobile">
             {% if expense.receipt %}
               <a href="{{ expense.receipt.url }}" target="_blank"><i class="bi bi-paperclip"></i></a>
             {% else %}<span class="text-danger small">Missing</span>{% endif %}
           </td>
-          <td>{{ expense.created_by.username }}</td>
+          <td class="table-hide-mobile">{{ expense.created_by.username }}</td>
           <td class="text-end">
             {% if user.can_write %}
-            <a href="{% url 'expenses:expense_edit' expense.pk %}" class="btn btn-sm btn-outline-secondary">Edit</a>
+            <div class="action-buttons">
+              <a href="{% url 'expenses:expense_edit' expense.pk %}" class="btn btn-sm btn-outline-secondary">Edit</a>
+            </div>
             {% endif %}
           </td>
         </tr>

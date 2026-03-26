@@ -1,7 +1,10 @@
 {% extends "base.html" %}
+{% load static %}
 {% block title %}Users{% endblock %}
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
+<link href="{% static 'css/list-pages.css' %}" rel="stylesheet">
+
+<div class="list-header">
   <h4 class="fw-bold mb-0"><i class="bi bi-person-gear me-2"></i>User Management</h4>
   <a href="{% url 'accounts:user_create' %}" class="btn btn-primary btn-sm">
     <i class="bi bi-plus-lg me-1"></i>Add User
@@ -11,21 +14,27 @@
   <div class="table-responsive">
     <table class="table table-hover mb-0">
       <thead class="table-light">
-        <tr><th>Username</th><th>Name</th><th>Email</th><th>Role</th><th>Status</th><th></th></tr>
+        <tr>
+          <th>Username</th>
+          <th class="table-hide-mobile">Name</th>
+          <th class="table-hide-mobile">Email</th>
+          <th class="table-hide-mobile">Role</th>
+          <th class="table-hide-mobile">Status</th>
+          <th></th>
+        </tr>
       </thead>
       <tbody>
         {% for u in users %}
         <tr>
           <td>{{ u.username }}</td>
-          <td>{{ u.get_full_name|default:"—" }}</td>
-          <td>{{ u.email|default:"—" }}</td>
-          <td><span class="badge bg-secondary">{{ u.get_role_display }}</span></td>
-          <td>{% if u.is_active %}<span class="badge bg-success">Active</span>{% else %}<span class="badge bg-danger">Inactive</span>{% endif %}</td>
-
+          <td class="table-hide-mobile">{{ u.get_full_name|default:"—" }}</td>
+          <td class="table-hide-mobile">{{ u.email|default:"—" }}</td>
+          <td class="table-hide-mobile"><span class="badge bg-secondary">{{ u.get_role_display }}</span></td>
+          <td class="table-hide-mobile">{% if u.is_active %}<span class="badge bg-success">Active</span>{% else %}<span class="badge bg-danger">Inactive</span>{% endif %}</td>
           <td><a href="{% url 'accounts:user_edit' u.pk %}" class="btn btn-sm btn-outline-secondary">Edit</a></td>
         </tr>
         {% empty %}
-        <tr><td colspan="7" class="text-center text-muted py-4">No users found.</td></tr>
+        <tr><td colspan="6" class="text-center text-muted py-4">No users found.</td></tr>
         {% endfor %}
       </tbody>
     </table>

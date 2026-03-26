@@ -1,0 +1,140 @@
+/* AUDIT LOGS RESPONSIVE STYLES */
+
+.audit-header {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.audit-header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+@media (max-width: 767.98px) {
+  .audit-header-top {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .audit-header-top h1 {
+    font-size: 1.3rem !important;
+    width: 100%;
+  }
+}
+
+/* Responsive filter form */
+.filter-form {
+  gap: 1rem;
+  display: grid;
+  grid-template-columns: 1fr;
+}
+
+.filter-form .col-md-4 {
+  grid-column: 1;
+  width: 100%;
+}
+
+.filter-form .col-md-3 {
+  width: 100%;
+}
+
+.filter-form .col-md-3:nth-of-type(2),
+.filter-form .col-md-3:nth-of-type(3) {
+  grid-column: auto;
+}
+
+@supports (display: grid) {
+  .filter-form {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+
+  .filter-form .col-md-4 {
+    grid-column: 1 / -1;
+  }
+
+  .filter-form .col-md-2 {
+    grid-column: 1 / -1;
+  }
+}
+
+.filter-form .d-flex {
+  flex-direction: row;
+  width: auto;
+  gap: 0.5rem;
+  justify-content: center;
+  margin: 0 auto;
+  grid-column: 1 / -1;
+}
+
+.filter-form .d-flex .btn {
+  width: auto;
+  padding: 0.5rem 1rem;
+}
+
+@media (min-width: 768px) and (max-width: 1023.98px) {
+  .filter-form .col-md-4 {
+    max-width: 100%;
+  }
+
+  .filter-form .col-md-3 {
+    max-width: 100%;
+  }
+
+  .filter-form .col-md-2 {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 479.98px) {
+  .filter-form .d-flex {
+    flex-direction: row;
+    width: auto;
+    justify-content: center;
+  }
+
+  .filter-form .btn {
+    width: auto;
+    padding: 0.5rem 0.75rem;
+  }
+}
+
+/* Hide non-essential columns on mobile */
+@media (max-width: 767.98px) {
+  .table-hide-mobile {
+    display: none;
+  }
+}
+
+/* Touch-friendly table */
+.table tbody tr {
+  min-height: 44px;
+}
+
+@media (max-width: 479.98px) {
+  .table {
+    font-size: 0.875rem;
+  }
+
+  .table th {
+    font-size: 0.8rem;
+  }
+}
+
+/* Modal responsiveness */
+@media (max-width: 767.98px) {
+  .modal-dialog {
+    margin: 1rem;
+  }
+
+  .modal-body {
+    max-height: 60vh;
+    overflow-y: auto;
+  }
+}

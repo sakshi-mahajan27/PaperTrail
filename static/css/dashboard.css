@@ -1,0 +1,71 @@
+/* DASHBOARD PAGE RESPONSIVE STYLES */
+
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+@media (max-width: 479.98px) {
+  .dashboard-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .dashboard-header h4 {
+    width: 100%;
+    font-size: 1.3rem !important;
+  }
+}
+
+.stat-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+@media (max-width: 479.98px) {
+  .stat-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .stat-card i {
+    font-size: 1.5rem !important;
+  }
+}
+
+/* Responsive card header */
+.card-header-responsive {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+@media (max-width: 479.98px) {
+  .card-header-responsive {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .card-header-responsive span {
+    width: 100%;
+  }
+
+  .card-header-responsive .btn {
+    width: 100%;
+  }
+}
+
+/* Responsive burn rate */
+@media (max-width: 767.98px) {
+  .burn-rate-cell {
+    min-width: auto !important;
+  }
+}

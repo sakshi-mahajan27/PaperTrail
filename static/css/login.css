@@ -1,0 +1,45 @@
+/* LOGIN PAGE RESPONSIVE STYLES */
+
+.login-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #1a2a42;
+  padding: 1rem;
+}
+
+.login-card {
+  width: 100%;
+  max-width: 380px;
+  border-radius: 8px;
+}
+
+@media (max-width: 479.98px) {
+  /* Mobile: Full width with less padding */
+  .login-card {
+    max-width: 100%;
+    border-radius: 4px;
+  }
+
+  .login-container {
+    padding: 0.75rem;
+  }
+}
+
+/* Touch-friendly buttons */
+.login-card .btn {
+  min-height: 44px;
+  font-weight: 500;
+}
+
+.login-card .form-control,
+.login-card .form-label {
+  font-size: 1rem;
+}
+
+@media (max-width: 479.98px) {
+  .login-card h4 {
+    font-size: 1.3rem !important;
+  }
+}

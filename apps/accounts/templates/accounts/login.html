@@ -1,8 +1,11 @@
 {% extends "base.html" %}
+{% load static %}
 {% block title %}Login{% endblock %}
 {% block auth_content %}
-<div class="min-vh-100 d-flex align-items-center justify-content-center" style="background:#1a2a42;">
-  <div class="card p-4" style="width:380px;">
+<link href="{% static 'css/login.css' %}" rel="stylesheet">
+
+<div class="login-container">
+  <div class="card login-card p-4">
     <div class="text-center mb-4">
       <i class="bi bi-journal-check text-primary" style="font-size:2.5rem;"></i>
       <h4 class="fw-bold mt-2 mb-0">PaperTrail</h4>

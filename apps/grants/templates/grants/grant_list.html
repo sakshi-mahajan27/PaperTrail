@@ -1,7 +1,10 @@
 {% extends "base.html" %}
+{% load static %}
 {% block title %}Grants{% endblock %}
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
+<link href="{% static 'css/list-pages.css' %}" rel="stylesheet">
+
+<div class="list-header">
   <h4 class="fw-bold mb-0"><i class="bi bi-wallet2 me-2"></i>Grants</h4>
   {% if user.can_write %}
   <a href="{% url 'grants:grant_create' %}" class="btn btn-primary btn-sm">
@@ -10,7 +13,7 @@
   {% endif %}
 </div>
 
-<form method="get" class="row g-2 mb-4">
+<form method="get" class="row g-2 mb-4 filter-form">
   <div class="col-md-3">
     <select name="status" class="form-select form-select-sm">
       <option value="">All Statuses</option>
@@ -29,35 +32,45 @@
   <div class="table-responsive">
     <table class="table table-hover mb-0">
       <thead class="table-light">
-        <tr><th>Name</th><th>Donor</th><th>Budget</th><th>Period</th><th>Status</th><th>Burn Rate</th><th></th></tr>
+        <tr>
+          <th>Name</th>
+          <th class="table-hide-mobile">Donor</th>
+          <th class="table-hide-mobile">Budget</th>
+          <th class="table-hide-mobile">Period</th>
+          <th class="table-hide-mobile">Status</th>
+          <th class="table-hide-mobile">Burn Rate</th>
+          <th></th>
+        </tr>
       </thead>
       <tbody>
         {% for grant in grants %}
         <tr>
           <td><a href="{% url 'grants:grant_detail' grant.pk %}">{{ grant.name }}</a></td>
-          <td>{{ grant.donor.name }}</td>
-          <td>₹{{ grant.total_amount|floatformat:2 }}</td>
-          <td><small>{{ grant.start_date }} – {{ grant.end_date }}</small></td>
-          <td>
+          <td class="table-hide-mobile">{{ grant.donor.name }}</td>
+          <td class="table-hide-mobile">₹{{ grant.total_amount|floatformat:2 }}</td>
+          <td class="table-hide-mobile"><small>{{ grant.start_date }} – {{ grant.end_date }}</small></td>
+          <td class="table-hide-mobile">
             <span class="badge {% if grant.status == 'active' %}bg-success{% elif grant.status == 'pending' %}bg-warning text-dark{% else %}bg-secondary{% endif %}">
               {{ grant.get_status_display }}
             </span>
           </td>
-          <td style="min-width:120px;">
+          <td class="table-hide-mobile">
             <div class="d-flex align-items-center gap-2">
               <div class="progress flex-grow-1" style="height:6px;">
                 <div class="progress-bar {% if grant.burn_rate >= 90 %}bg-danger{% elif grant.burn_rate >= 70 %}bg-warning{% else %}bg-success{% endif %}"
                      style="width:{{ grant.burn_rate }}%"></div>
               </div>
-              <small>{{ grant.burn_rate }}%</small>
+              <small style="min-width: 35px;">{{ grant.burn_rate }}%</small>
             </div>
           </td>
           <td class="text-end">
             {% if user.can_write %}
-            <a href="{% url 'grants:grant_edit' grant.pk %}" class="btn btn-sm btn-outline-secondary">Edit</a>
-            {% if grant.status != 'closed' %}
-            <a href="{% url 'grants:grant_close' grant.pk %}" class="btn btn-sm btn-outline-danger">Close</a>
-            {% endif %}
+            <div class="action-buttons">
+              <a href="{% url 'grants:grant_edit' grant.pk %}" class="btn btn-sm btn-outline-secondary">Edit</a>
+              {% if grant.status != 'closed' %}
+              <a href="{% url 'grants:grant_close' grant.pk %}" class="btn btn-sm btn-outline-danger">Close</a>
+              {% endif %}
+            </div>
             {% endif %}
           </td>
         </tr>

@@ -1,10 +1,15 @@
 {% extends "base.html" %}
+{% load static %}
 {% block title %}Reports{% endblock %}
 {% block content %}
-<h4 class="fw-bold mb-4"><i class="bi bi-file-earmark-bar-graph me-2"></i>Reports</h4>
-<div class="row g-3">
+<link href="{% static 'css/cards.css' %}" rel="stylesheet">
+
+<div class="report-header">
+  <h4 class="fw-bold mb-0"><i class="bi bi-file-earmark-bar-graph me-2"></i>Reports</h4>
+</div>
+<div class="row g-3 report-card-grid">
   {% for name, url, icon, desc in report_cards %}
-  <div class="col-md-4">
+  <div class="col-12 col-sm-6 col-lg-4">
     <div class="card h-100">
       <div class="card-body">
         <i class="bi {{ icon }} fs-2 text-primary mb-2"></i>

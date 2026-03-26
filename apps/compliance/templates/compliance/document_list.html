@@ -1,7 +1,11 @@
 {% extends "base.html" %}
+{% load static %}
 {% block title %}Compliance Vault{% endblock %}
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
+<link href="{% static 'css/list-pages.css' %}" rel="stylesheet">
+<link href="{% static 'css/cards.css' %}" rel="stylesheet">
+
+<div class="compliance-header">
   <h4 class="fw-bold mb-0"><i class="bi bi-shield-check me-2"></i>Compliance Vault</h4>
   {% if user.is_admin_role %}
   <a href="{% url 'compliance:document_upload' %}" class="btn btn-primary btn-sm">
@@ -9,24 +13,24 @@
   </a>
   {% endif %}
 </div>
-<div class="row g-3">
+<div class="row g-3 compliance-grid">
   {% for doc in docs %}
-  <div class="col-md-4">
+  <div class="col-12 col-sm-6 col-lg-4">
     <div class="card h-100 border-start border-4
       {% if doc.status == 'green' %}border-success
       {% elif doc.status == 'yellow' %}border-warning
       {% else %}border-danger{% endif %}">
       <div class="card-body">
-        <div class="d-flex justify-content-between align-items-start">
-          <h6 class="fw-bold">{{ doc.get_cert_type_display }}</h6>
+        <div class="d-flex justify-content-between align-items-start gap-2">
+          <h6 class="fw-bold mb-0">{{ doc.get_cert_type_display }}</h6>
           <span class="badge
             {% if doc.status == 'green' %}bg-success
             {% elif doc.status == 'yellow' %}bg-warning text-dark
-            {% else %}bg-danger{% endif %}">
+            {% else %}bg-danger{% endif %}" style="white-space: nowrap;">
             {{ doc.status_label }}
           </span>
         </div>
-        <dl class="row mb-0 small mt-2">
+        <dl class="row mb-0 small mt-3">
           <dt class="col-6">Issued</dt><dd class="col-6">{{ doc.issue_date }}</dd>
           <dt class="col-6">Expires</dt><dd class="col-6">{{ doc.expiry_date }}</dd>
           <dt class="col-6">Days Left</dt>
@@ -38,7 +42,7 @@
             {% endif %}
           </dd>
         </dl>
-        <div class="mt-3 d-flex gap-2">
+        <div class="mt-3 card-actions">
           <a href="{% url 'compliance:document_detail' doc.pk %}" class="btn btn-sm btn-outline-secondary">View</a>
           {% if user.is_admin_role %}
           <a href="{% url 'compliance:document_edit' doc.pk %}" class="btn btn-sm btn-outline-primary">Edit</a>

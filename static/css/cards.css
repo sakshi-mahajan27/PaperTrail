@@ -1,0 +1,113 @@
+/* CARD GRID RESPONSIVE STYLES */
+
+/* Card grid responsive */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+/* Compliance header spacing */
+.compliance-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+/* Report header spacing */
+.report-header {
+  margin-bottom: 2rem;
+}
+
+@media (max-width: 479.98px) {
+  .compliance-header {
+    flex-direction: column;
+    align-items: flex-start;
+    margin-bottom: 1.5rem;
+  }
+
+  .compliance-header h4 {
+    width: 100%;
+    font-size: 1.3rem !important;
+  }
+
+  .compliance-header .btn {
+    width: 100%;
+  }
+}
+
+/* Compliance grid spacing */
+.compliance-grid {
+  margin-top: 1.5rem;
+}
+
+@media (max-width: 1023.98px) {
+  .card-grid {
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1rem;
+  }
+}
+
+@media (max-width: 767.98px) {
+  .card-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+  }
+}
+
+@media (max-width: 479.98px) {
+  .card-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+}
+
+/* Card actions responsive */
+.card-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 479.98px) {
+  .card-actions {
+    flex-direction: column;
+  }
+
+  .card-actions .btn {
+    width: 100%;
+    font-size: 0.875rem;
+  }
+}
+
+/* Compliance document card specific styles */
+.document-card {
+  border-left: 4px solid #ccc;
+}
+
+.document-card.green {
+  border-left-color: #198754;
+}
+
+.document-card.yellow {
+  border-left-color: #ffc107;
+}
+
+.document-card.red {
+  border-left-color: #dc3545;
+}
+
+/* Badge sizing for cards */
+.card .badge {
+  white-space: nowrap;
+  display: inline-block;
+}
+
+@media (max-width: 479.98px) {
+  .card .badge {
+    font-size: 0.75rem;
+  }
+}

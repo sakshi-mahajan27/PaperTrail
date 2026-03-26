@@ -1,0 +1,381 @@
+/* BASE STYLES */
+html,
+body {
+  font-size: 0.92rem;
+  overflow: hidden;
+  height: 100%;
+}
+
+.sidebar {
+  height: 100vh;
+  background: #1a2a42;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar .nav-link {
+  color: #c5cfe0;
+  border-radius: 6px;
+  padding: 0.45rem 0.9rem;
+}
+
+.sidebar .nav-link:hover,
+.sidebar .nav-link.active {
+  background: #2b4070;
+  color: #fff;
+}
+
+.sidebar .nav-section {
+  color: #6e84a8;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 0.6rem 0.9rem 0.2rem;
+}
+
+.sidebar-brand {
+  color: #fff;
+  font-weight: 700;
+  font-size: 1.2rem;
+  margin: 0;
+  padding: 0.5rem 0.9rem;
+}
+
+.badge-green {
+  background-color: #198754;
+}
+
+.badge-yellow {
+  background-color: #ffc107;
+  color: #000;
+}
+
+.badge-red {
+  background-color: #dc3545;
+}
+
+.status-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.dot-green {
+  background: #198754;
+}
+
+.dot-yellow {
+  background: #ffc107;
+}
+
+.dot-red {
+  background: #dc3545;
+}
+
+main {
+  background: #f5f7fa;
+  height: 100vh;
+  overflow-y: auto;
+}
+
+.card {
+  border: none;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+}
+
+/* GLOBAL TOUCH-FRIENDLY SIZING */
+.btn {
+  min-height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.form-control,
+.form-select {
+  min-height: 44px;
+  font-size: 1rem;
+}
+
+.form-label {
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+
+/* GLOBAL RESPONSIVE SPACING */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+/* RESPONSIVE UTILITIES */
+/* Main flex container */
+.d-flex {
+  height: 100;
+}
+
+/* RESPONSIVE MOBILE MENU */
+.sidebar-toggle {
+  display: none;
+  background: #1a2a42;
+  border: none;
+  color: #fff;
+  padding: 0.75rem 1rem;
+  font-size: 1.25rem;
+  cursor: pointer;
+  min-height: 38px;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Mobile header styles */
+.mobile-header {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: #1a2a42;
+  color: #fff;
+  padding: 0.75rem 1rem;
+  z-index: 1001;
+  align-items: center;
+  justify-content: space-between;
+  height: 60px;
+  box-sizing: border-box;
+}
+
+.mobile-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #fff;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+.mobile-brand i {
+  font-size: 1.25rem;
+}
+
+@media (max-width: 767.98px) {
+  /* Mobile: Show header, hide sidebar by default */
+  .mobile-header {
+    display: flex;
+  }
+
+  .sidebar-toggle {
+    display: flex;
+    position: static;
+    padding: 0;
+    width: auto;
+  }
+
+  .sidebar {
+    position: fixed;
+    left: -230px;
+    top: 0;
+    width: 230px;
+    height: 100vh;
+    z-index: 1000;
+    transition: left 0.3s ease;
+  }
+
+  .sidebar.show {
+    left: 0;
+  }
+
+  .sidebar-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+  }
+
+  .sidebar-overlay.show {
+    display: block;
+  }
+
+  /* Adjust main layout for mobile */
+  .d-flex {
+    flex-direction: column;
+    height: 100%;
+  }
+
+  main {
+    padding: 1rem;
+    padding-top: 60px;
+    overflow-y: auto;
+    margin-top: 60px;
+  }
+
+  /* Stack layout vertically on mobile */
+  /* Improve mobile button spacing */
+  .btn-sm {
+    padding: 0.4rem 0.75rem;
+    min-height: auto;
+    font-size: 0.875rem;
+  }
+
+  /* Make badges more readable on mobile */
+  .badge {
+    display: inline-block;
+    padding: 0.35em 0.65em;
+    font-size: 75%;
+    font-weight: 700;
+    line-height: 1;
+    border-radius: 0.25rem;
+  }
+
+  /* Responsive text utilities */
+  h4 {
+    font-size: 1.2rem !important;
+  }
+
+  h5 {
+    font-size: 1.1rem !important;
+  }
+
+  /* Ensure links are touch-friendly */
+  a {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  /* Better spacing for small screens */
+  .row {
+    --bs-gutter-x: 0.75rem;
+    --bs-gutter-y: 0.75rem;
+  }
+}
+
+@media (max-width: 479.98px) {
+  /* Extra small: Reduce padding further */
+  main {
+    padding: 0.75rem;
+  }
+
+  .sidebar-brand {
+    font-size: 1rem;
+  }
+
+  h4 {
+    font-size: 1.15rem !important;
+  }
+
+  /* Better card spacing */
+  .card {
+    margin-bottom: 1rem;
+  }
+
+  .card-body {
+    padding: 1rem;
+  }
+
+  /* Reduce font size slightly for readability */
+  body {
+    font-size: 0.9rem;
+  }
+
+  /* Improve table readability */
+  .table {
+    font-size: 0.875rem;
+    margin-bottom: 0;
+  }
+
+  .table th {
+    font-size: 0.8rem;
+    padding: 0.5rem;
+  }
+
+  .table td {
+    padding: 0.5rem;
+  }
+
+  /* Better form element sizing */
+  .form-control,
+  .form-select,
+  .btn {
+    font-size: 16px !important; /* Prevents zoom on iOS */
+  }
+
+  /* Responsive images */
+  img {
+    max-width: 100%;
+    height: auto;
+  }
+}
+
+/* TABLET (768px - 1024px) */
+@media (min-width: 768px) and (max-width: 1023.98px) {
+  main {
+    padding: 1.5rem;
+  }
+
+  .sidebar {
+    min-width: 200px;
+  }
+
+  /* Optimize columns for tablet */
+  .row > [class*="col-"] {
+    padding: 0.75rem;
+  }
+}
+
+/* DESKTOP (1025px+) */
+@media (min-width: 1024px) {
+  .sidebar-toggle {
+    display: none;
+  }
+
+  main {
+    padding: 2rem;
+  }
+
+  .sidebar {
+    min-width: 230px;
+  }
+}
+
+/* LANDSCAPE MODE */
+@media (max-height: 600px) {
+  .sidebar {
+    min-height: auto;
+    height: 100%;
+    overflow-y: auto;
+  }
+
+  main {
+    padding: 1rem;
+  }
+}
+
+/* PRINT STYLES */
+@media print {
+  .sidebar,
+  .sidebar-toggle,
+  .sidebar-overlay,
+  .btn,
+  .pagination {
+    display: none !important;
+  }
+
+  main {
+    padding: 0;
+    background: white;
+  }
+}
