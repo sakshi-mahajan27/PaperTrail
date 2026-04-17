@@ -47,6 +47,7 @@ def login_view(request):
     if request.method == "POST":
         if form.is_valid():
             login(request, form.get_user())
+            messages.success(request, "Successfully logged in.")
             return redirect(request.GET.get("next", "accounts:dashboard"))
         messages.error(request, "Invalid username or password.")
     return render(request, "accounts/login.html", {"form": form})
@@ -56,11 +57,12 @@ def login_view(request):
 @login_required
 def logout_view(request):
     """
-    Handle user logout.
+    Handle user logout with enhanced security.
 
     This view logs out the authenticated user and clears the session.
     It's restricted to POST requests to prevent accidental logouts via
-    direct links. After logout, user is redirected to the login page.
+    direct links. After logout, user is redirected to the login page with
+    cache control headers to ensure logout is immediate.
 
     Request Method:
         POST only (enforced by @require_POST decorator)
@@ -69,15 +71,34 @@ def logout_view(request):
         Requires logged-in user (@login_required)
 
     Response:
-        302 Redirect to login page
+        302 Redirect to login page with cache control headers
+
+    Security Measures:
+        - Session is cleared on logout
+        - Cache control headers prevent browser caching of logout response
+        - @require_POST prevents CSRF attacks
+        - Set-Cookie expires to clear session cookie
+        - Additional headers ensure browser won't cache authenticated pages
 
     Notes:
-        - Session is cleared on logout
-        - Uses @require_POST for CSRF protection
         - Unauthenticated users are redirected to login page before POST check
+        - All authenticated pages are protected by NoCacheMiddleware
+        - Combined with middleware, ensures user cannot access pages via back button
     """
     logout(request)
-    return redirect("accounts:login")
+    
+    # Add success message AFTER logout but before response is returned
+    # The messages framework will use session storage for the new unauthenticated session
+    messages.success(request, "You have been successfully logged out.")
+    
+    response = redirect("accounts:login")
+    
+    # Add cache control headers to logout response
+    response['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0, private'
+    response['Pragma'] = 'no-cache'
+    response['Expires'] = '0'
+    
+    return response
 
 
 @login_required

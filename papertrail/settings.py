@@ -51,6 +51,9 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    # Security middleware for cache control and secure sessions
+    "papertrail.middleware.NoCacheMiddleware",
+    "papertrail.middleware.SecureSessionMiddleware",
     # Audit logging middleware
     "apps.audit.signals.AuditMiddlewareUser",
 ]
@@ -162,3 +165,6 @@ LOGGING = {
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 SESSION_COOKIE_AGE = 1800  # 30 minutes
+SESSION_COOKIE_HTTPONLY = True  # Prevent JavaScript access to session cookie
+SESSION_COOKIE_SECURE = False  # Set to True in production with HTTPS
+SESSION_COOKIE_SAMESITE = 'Strict'  # Prevent CSRF by restricting cross-site cookies
