@@ -1,5 +1,5 @@
 from django.urls import path
-from . import views, pdf_views
+from . import views, pdf_views, csv_views
 
 app_name = "reports"
 
@@ -16,5 +16,11 @@ urlpatterns = [
     path("financial-summary/pdf/", pdf_views.financial_summary_pdf, name="financial_summary_pdf"),
     path("compliance-status/pdf/", pdf_views.compliance_status_pdf, name="compliance_status_pdf"),
     path("expense-ledger/pdf/", pdf_views.expense_ledger_pdf, name="expense_ledger_pdf"),
+    # CSV exports
+    path("donor-expenses/csv/", csv_views.donor_expense_csv, name="donor_expense_csv"),
+    path("grant-utilization/csv/", csv_views.grant_utilization_csv, name="grant_utilization_csv"),
+    path("financial-summary/csv/", csv_views.financial_summary_csv, name="financial_summary_csv"),
+    path("compliance-status/csv/", csv_views.compliance_status_csv, name="compliance_status_csv"),
+    path("expense-ledger/csv/", csv_views.expense_ledger_csv, name="expense_ledger_csv"),
 ]
 

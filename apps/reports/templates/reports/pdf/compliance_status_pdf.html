@@ -1,45 +1,88 @@
 {% extends "reports/pdf/base_pdf.html" %}
 {% load papertrail_extras %}
 {% block report_title %}Compliance Status Report{% endblock %}
+{% block report_tagline %}Current status of FCRA, 80G &amp; 12A compliance certificates{% endblock %}
+
 {% block content %}
-<table>
+
+<!-- Compliance summary pills -->
+<div class="section-label">Certificate Overview</div>
+<table class="kpi-table">
+  {% for doc in docs %}
+  <tr>
+    <td class="kpi-cell {% if doc.status == 'green' %}green{% elif doc.status == 'yellow' %}{% else %}red{% endif %}"
+        style="width:33%; {% if doc.status == 'yellow' %}background-color:#fefce8;border-color:#f59e0b;{% endif %}">
+      <div class="kpi-label">{{ doc.get_cert_type_display }}</div>
+      <div class="kpi-value {% if doc.status == 'green' %}green{% elif doc.status == 'yellow' %}{% else %}red{% endif %}"
+           style="{% if doc.status == 'yellow' %}color:#b45309;{% endif %}">
+        {{ doc.status_label }}
+      </div>
+      <div style="font-size:7pt;margin-top:2pt;color:#64748b;">
+        Expires {{ doc.expiry_date|date:"d M Y" }}
+        &nbsp;&bull;&nbsp;
+        {% if doc.days_to_expiry < 0 %}
+          Expired {{ doc.days_to_expiry|abs_value }} days ago
+        {% else %}
+          {{ doc.days_to_expiry }} days left
+        {% endif %}
+      </div>
+    </td>
+    {% if not forloop.last %}<td style="width:1%"></td>{% endif %}
+  {% endfor %}
+  {% if docs|length == 1 %}<td style="width:66%"></td>{% endif %}
+  {% if docs|length == 2 %}<td style="width:33%"></td>{% endif %}
+</table>
+
+<!-- Detailed table -->
+<div class="section-label">Detailed Certificate Records</div>
+<table class="data-table">
   <thead>
     <tr>
       <th style="width:5%">#</th>
-      <th style="width:25%">Certificate Type</th>
+      <th style="width:28%">Certificate Type</th>
       <th style="width:15%">Issue Date</th>
       <th style="width:15%">Expiry Date</th>
-      <th style="width:20%">Days to Expiry</th>
-      <th style="width:20%">Status</th>
+      <th style="width:18%">Days to Expiry</th>
+      <th style="width:19%">Compliance Status</th>
     </tr>
   </thead>
   <tbody>
     {% for doc in docs %}
     <tr>
       <td>{{ forloop.counter }}</td>
-      <td>{{ doc.get_cert_type_display }}</td>
-      <td>{{ doc.issue_date }}</td>
-      <td>{{ doc.expiry_date }}</td>
+      <td class="fw-bold">{{ doc.get_cert_type_display }}</td>
+      <td>{{ doc.issue_date|date:"d M Y" }}</td>
+      <td>{{ doc.expiry_date|date:"d M Y" }}</td>
       <td>
         {% if doc.days_to_expiry < 0 %}
-          <span style="color:#dc2626;">Expired {{ doc.days_to_expiry|abs_value }} days ago</span>
+          <span class="text-danger fw-bold">Expired {{ doc.days_to_expiry|abs_value }} days ago</span>
+        {% elif doc.days_to_expiry <= 30 %}
+          <span style="color:#d97706;font-weight:bold;">{{ doc.days_to_expiry }} days &mdash; Urgent</span>
+        {% elif doc.days_to_expiry <= 180 %}
+          <span style="color:#b45309;">{{ doc.days_to_expiry }} days &mdash; Plan renewal</span>
         {% else %}
-          {{ doc.days_to_expiry }} days
+          <span class="text-success">{{ doc.days_to_expiry }} days</span>
         {% endif %}
       </td>
       <td>
         {% if doc.status == "green" %}
-          <span class="badge badge-success">{{ doc.status_label }}</span>
+          <span class="badge badge-success">&#10003;&nbsp; Valid</span>
         {% elif doc.status == "yellow" %}
-          <span class="badge badge-warning">{{ doc.status_label }}</span>
+          <span class="badge badge-warning">&#9888;&nbsp; Expiring Soon</span>
         {% else %}
-          <span class="badge badge-danger">{{ doc.status_label }}</span>
+          <span class="badge badge-danger">&#10007;&nbsp; Expired</span>
         {% endif %}
       </td>
     </tr>
     {% empty %}
-    <tr><td colspan="6" style="text-align:center;color:#888;">No compliance documents found.</td></tr>
+    <tr><td colspan="6" class="text-center text-muted" style="padding:12pt;">No compliance documents found.</td></tr>
     {% endfor %}
   </tbody>
 </table>
+
+<!-- Compliance note -->
+<p style="font-size:7.5pt;color:#64748b;margin-top:8pt;font-style:italic;">
+  &#9432;&nbsp; All three certificates (FCRA, 80G, 12A) must be Valid (green) for the NGO to create grants and record expenses.
+  A <strong>red</strong> certificate immediately blocks all financial operations until renewed.
+</p>
 {% endblock %}

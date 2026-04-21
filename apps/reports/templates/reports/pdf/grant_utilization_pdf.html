@@ -1,40 +1,74 @@
 {% extends "reports/pdf/base_pdf.html" %}
 {% block report_title %}Grant Utilization Report{% endblock %}
+{% block report_tagline %}Budget vs. utilized amounts across all active grants{% endblock %}
+
 {% block content %}
-<table>
+<div class="section-label">Grant-wise Budget Utilization</div>
+<table class="data-table">
   <thead>
     <tr>
       <th style="width:4%">#</th>
       <th style="width:22%">Grant</th>
-      <th style="width:18%">Donor</th>
-      <th style="width:8%">Status</th>
-      <th style="width:12%;text-align:right">Budget (Rs.)</th>
-      <th style="width:12%;text-align:right">Utilized (Rs.)</th>
-      <th style="width:12%;text-align:right">Remaining (Rs.)</th>
-      <th style="width:12%;text-align:right">Burn Rate</th>
+      <th style="width:17%">Donor</th>
+      <th style="width:9%">Status</th>
+      <th style="width:8%">Start</th>
+      <th style="width:8%">End</th>
+      <th style="width:11%;text-align:right">Budget (Rs.)</th>
+      <th style="width:11%;text-align:right">Utilized (Rs.)</th>
+      <th style="width:10%;text-align:right">Remaining</th>
+      <th style="width:9%;text-align:center">Burn Rate</th>
     </tr>
   </thead>
   <tbody>
     {% for grant in grants %}
     <tr>
       <td>{{ forloop.counter }}</td>
-      <td>{{ grant.name }}</td>
+      <td class="fw-bold">{{ grant.name }}</td>
       <td>{{ grant.donor.name }}</td>
       <td>
-        <span class="badge badge-secondary">{{ grant.get_status_display }}</span>
+        {% if grant.status == "active" %}
+          <span class="badge badge-success">Active</span>
+        {% elif grant.status == "pending" %}
+          <span class="badge badge-pending">Pending</span>
+        {% else %}
+          <span class="badge badge-secondary">Closed</span>
+        {% endif %}
       </td>
-      <td style="text-align:right">{{ grant.total_amount|floatformat:2 }}</td>
-      <td style="text-align:right">{{ grant.utilized_amount|floatformat:2 }}</td>
-      <td style="text-align:right;{% if grant.remaining_amount < 0 %}color:#dc2626;{% endif %}">
+      <td>{{ grant.start_date|date:"d M Y" }}</td>
+      <td>{{ grant.end_date|date:"d M Y" }}</td>
+      <td class="text-right">{{ grant.total_amount|floatformat:2 }}</td>
+      <td class="text-right">{{ grant.utilized_amount|floatformat:2 }}</td>
+      <td class="text-right {% if grant.remaining_amount < 0 %}text-danger{% else %}text-success{% endif %}">
         {{ grant.remaining_amount|floatformat:2 }}
       </td>
-      <td style="text-align:right;{% if grant.burn_rate >= 90 %}color:#dc2626;{% elif grant.burn_rate >= 70 %}color:#d97706;{% else %}color:#16a34a;{% endif %}">
-        {{ grant.burn_rate }}%
+      <td class="text-center">
+        <span class="fw-bold {% if grant.burn_rate >= 90 %}text-danger{% elif grant.burn_rate >= 70 %}{% else %}text-success{% endif %}">
+          {{ grant.burn_rate }}%
+        </span>
+        <div class="burn-bar-bg">
+          <div class="burn-bar-fill"
+            style="width:{% if grant.burn_rate > 100 %}100{% else %}{{ grant.burn_rate }}{% endif %}%;
+                   background-color:{% if grant.burn_rate >= 90 %}#ef4444{% elif grant.burn_rate >= 70 %}#f59e0b{% else %}#22c55e{% endif %};">
+          </div>
+        </div>
       </td>
     </tr>
     {% empty %}
-    <tr><td colspan="8" style="text-align:center;color:#888;">No grants found.</td></tr>
+    <tr><td colspan="10" class="text-center text-muted" style="padding:12pt;">No grants found.</td></tr>
     {% endfor %}
   </tbody>
+  {% if grants %}
+  <tfoot>
+    <tr>
+      <td colspan="6" class="text-right">Total</td>
+      <td class="text-right">
+        {% with total=0 %}
+          {{ grants|length }} grants
+        {% endwith %}
+      </td>
+      <td colspan="3"></td>
+    </tr>
+  </tfoot>
+  {% endif %}
 </table>
 {% endblock %}

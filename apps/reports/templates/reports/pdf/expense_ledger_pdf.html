@@ -1,46 +1,92 @@
 {% extends "reports/pdf/base_pdf.html" %}
 {% block report_title %}Expense Ledger{% endblock %}
-{% block extra_meta %}{% if grant_name %}&nbsp;&bull;&nbsp; Filtered by grant: {{ grant_name }}{% endif %}{% endblock %}
+{% block report_tagline %}Chronological audit trail of all recorded expenses and grant allocations{% endblock %}
+{% block extra_meta %}{% if grant_name %}&nbsp;&bull;&nbsp; Grant filter: <strong>{{ grant_name }}</strong>{% endif %}{% endblock %}
+
 {% block content %}
-<table>
+
+<!-- Summary row -->
+{% if expenses %}
+<table class="kpi-table" style="margin-bottom:10pt;">
+  <tr>
+    <td class="kpi-cell blue" style="width:33%">
+      <div class="kpi-label">Total Expenses (this view)</div>
+      <div class="kpi-value blue">Rs.{{ total_amount|floatformat:2 }}</div>
+    </td>
+    <td style="width:1%"></td>
+    <td class="kpi-cell violet" style="width:33%">
+      <div class="kpi-label">Number of Entries</div>
+      <div class="kpi-value violet">{{ expenses|length }}</div>
+    </td>
+    <td style="width:1%"></td>
+    <td style="width:33%"></td>
+  </tr>
+</table>
+{% endif %}
+
+<div class="section-label">Expense Entries</div>
+<table class="data-table">
   <thead>
     <tr>
       <th style="width:4%">#</th>
-      <th style="width:10%">Date</th>
-      <th style="width:20%">Title</th>
-      <th style="width:12%;text-align:right">Amount (Rs.)</th>
-      <th style="width:35%">Grant Allocations</th>
+      <th style="width:9%">Date</th>
+      <th style="width:22%">Title / Description</th>
+      <th style="width:11%;text-align:right">Amount (Rs.)</th>
+      <th style="width:32%">Grant Allocations</th>
       <th style="width:12%">Recorded By</th>
-      <th style="width:7%">Receipt</th>
+      <th style="width:6%;text-align:center">Receipt</th>
     </tr>
   </thead>
   <tbody>
     {% for expense in expenses %}
     <tr>
       <td>{{ forloop.counter }}</td>
-      <td>{{ expense.expense_date }}</td>
-      <td>{{ expense.title|truncatechars:45 }}</td>
-          <td style="text-align:right">{{ expense.total_amount|floatformat:2 }}</td>
-          <td>
-            {% for alloc in expense.allocations.all %}
-              <span style="display:block;white-space:normal;word-wrap:break-word;margin-bottom:4px;">{{ alloc.grant.name }} (Rs.{{ alloc.allocated_amount|floatformat:0 }})</span>
-            {% endfor %}
-          </td>
-      <td>{{ expense.created_by.username }}</td>
-      <td style="text-align:center">{% if expense.receipt %}Yes{% else %}<span style="color:#dc2626;">No</span>{% endif %}</td>
+      <td>{{ expense.expense_date|date:"d M Y" }}</td>
+      <td>
+        <span class="fw-bold">{{ expense.title|truncatechars:45 }}</span>
+        {% if expense.description %}
+        <br><span style="font-size:7pt;color:#94a3b8;">{{ expense.description|truncatechars:60 }}</span>
+        {% endif %}
+      </td>
+      <td class="text-right fw-bold">{{ expense.total_amount|floatformat:2 }}</td>
+      <td>
+        {% for alloc in expense.allocations.all %}
+        <span style="display:block;font-size:7.5pt;margin-bottom:2pt;">
+          <span style="color:#4f46e5;font-weight:bold;">{{ alloc.grant.name }}</span>
+          <span style="color:#64748b;">({{ alloc.grant.donor.name }})</span>
+          &mdash; <span class="fw-bold">Rs.{{ alloc.allocated_amount|floatformat:0 }}</span>
+        </span>
+        {% endfor %}
+      </td>
+      <td style="font-size:8pt;">{{ expense.created_by.get_full_name|default:expense.created_by.username }}</td>
+      <td class="text-center">
+        {% if expense.receipt %}
+          <span class="badge badge-success">Yes</span>
+        {% else %}
+          <span class="badge badge-danger">Missing</span>
+        {% endif %}
+      </td>
     </tr>
     {% empty %}
-    <tr><td colspan="7" style="text-align:center;color:#888;">No expenses found.</td></tr>
+    <tr>
+      <td colspan="7" class="text-center text-muted" style="padding:14pt;">
+        No expenses found{% if grant_name %} for grant "{{ grant_name }}"{% endif %}.
+      </td>
+    </tr>
     {% endfor %}
   </tbody>
   {% if expenses %}
   <tfoot>
     <tr>
-      <td colspan="3" style="text-align:right">Grand Total</td>
-      <td style="text-align:right">{{ total_amount|floatformat:2 }}</td>
+      <td colspan="3" class="text-right">Grand Total &mdash; {{ expenses|length }} entries</td>
+      <td class="text-right">{{ total_amount|floatformat:2 }}</td>
       <td colspan="3"></td>
     </tr>
   </tfoot>
   {% endif %}
 </table>
+
+<p style="font-size:7.5pt;color:#64748b;margin-top:8pt;font-style:italic;">
+  &#9432;&nbsp; Only active (non-deleted) expenses are included in this ledger. Soft-deleted entries are permanently excluded.
+</p>
 {% endblock %}

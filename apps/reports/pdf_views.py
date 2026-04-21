@@ -1,6 +1,7 @@
 from django.contrib.auth.decorators import login_required
 from django.db.models import Sum
 from django.utils import timezone
+from django.utils.timezone import localtime
 from apps.accounts.decorators import report_required
 
 from apps.donors.models import Donor
@@ -27,7 +28,7 @@ def donor_expense_pdf(request):
     context = {
         "rows": rows,
         "grand_total": grand_total,
-        "generated_on": timezone.now(),
+        "generated_on": localtime(timezone.now()).strftime("%d %b %Y, %H:%M"),
         "user": request.user,
     }
     return render_pdf_response(
@@ -44,7 +45,7 @@ def grant_utilization_pdf(request):
     grants = Grant.objects.filter(is_active=True).select_related("donor")
     context = {
         "grants": grants,
-        "generated_on": timezone.now(),
+        "generated_on": localtime(timezone.now()).strftime("%d %b %Y, %H:%M"),
         "user": request.user,
     }
     return render_pdf_response(
@@ -67,7 +68,7 @@ def financial_summary_pdf(request):
         "total_expenses": total_expenses,
         "net_unspent": net_unspent,
         "grants": grants,
-        "generated_on": timezone.now(),
+        "generated_on": localtime(timezone.now()).strftime("%d %b %Y, %H:%M"),
         "user": request.user,
     }
     return render_pdf_response(
@@ -84,7 +85,7 @@ def compliance_status_pdf(request):
     docs = ComplianceDocument.objects.all()
     context = {
         "docs": docs,
-        "generated_on": timezone.now(),
+        "generated_on": localtime(timezone.now()).strftime("%d %b %Y, %H:%M"),
         "user": request.user,
     }
     return render_pdf_response(
@@ -117,7 +118,7 @@ def expense_ledger_pdf(request):
         "grant_filter": grant_filter,
         "grant_name": grant_name,
         "total_amount": total_amount,
-        "generated_on": timezone.now(),
+        "generated_on": localtime(timezone.now()).strftime("%d %b %Y, %H:%M"),
         "user": request.user,
     }
     return render_pdf_response(

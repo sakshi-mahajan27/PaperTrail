@@ -1,34 +1,51 @@
 {% extends "reports/pdf/base_pdf.html" %}
 {% block report_title %}Donor-wise Expense Report{% endblock %}
+{% block report_tagline %}Total expenses broken down by each donor and their grants{% endblock %}
+
 {% block content %}
-<table>
+<div class="section-label">Aggregate Donor Spending</div>
+<table class="data-table">
   <thead>
     <tr>
-      <th style="width:5%">#</th>
-      <th style="width:40%">Donor Name</th>
-      <th style="width:20%">Type</th>
-      <th style="width:20%">Country</th>
-      <th style="width:15%;text-align:right">Total Expenses (Rs.)</th>
+      <th style="width:4%">#</th>
+      <th style="width:28%">Donor Name</th>
+      <th style="width:14%">Type</th>
+      <th style="width:14%">PAN Number</th>
+      <th style="width:16%">Email</th>
+      <th style="width:10%">Country</th>
+      <th style="width:14%;text-align:right">Total Expenses (Rs.)</th>
     </tr>
   </thead>
   <tbody>
     {% for row in rows %}
     <tr>
       <td>{{ forloop.counter }}</td>
-      <td>{{ row.donor.name }}</td>
-      <td>{{ row.donor.get_donor_type_display }}</td>
-      <td>{{ row.donor.country|default:"—" }}</td>
-      <td style="text-align:right">{{ row.total|floatformat:2 }}</td>
+      <td class="fw-bold">{{ row.donor.name }}</td>
+      <td>
+        {% if row.donor.donor_type == "individual" %}
+          <span class="badge badge-info">Individual</span>
+        {% elif row.donor.donor_type == "corporate" %}
+          <span class="badge badge-secondary">Corporate</span>
+        {% elif row.donor.donor_type == "government" %}
+          <span class="badge badge-warning">Government</span>
+        {% else %}
+          <span class="badge badge-success">Organisation</span>
+        {% endif %}
+      </td>
+      <td>{{ row.donor.pan_number|default:"N/A" }}</td>
+      <td style="font-size:7.5pt;">{{ row.donor.email|default:"—" }}</td>
+      <td>{{ row.donor.country|default:"India" }}</td>
+      <td class="text-right fw-bold">{{ row.total|floatformat:2 }}</td>
     </tr>
     {% empty %}
-    <tr><td colspan="5" style="text-align:center;color:#888;">No donor data available.</td></tr>
+    <tr><td colspan="7" class="text-center text-muted" style="padding:12pt;">No donor data available.</td></tr>
     {% endfor %}
   </tbody>
   {% if rows %}
   <tfoot>
     <tr>
-      <td colspan="4" style="text-align:right">Grand Total</td>
-      <td style="text-align:right">{{ grand_total|floatformat:2 }}</td>
+      <td colspan="6" class="text-right">Grand Total</td>
+      <td class="text-right">{{ grand_total|floatformat:2 }}</td>
     </tr>
   </tfoot>
   {% endif %}
